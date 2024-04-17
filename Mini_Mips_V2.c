@@ -43,15 +43,9 @@ void carregarMemoria();
 void imprimirMemoria();
 void imprimirRegistradores();
 void imprimirInstrucao(Instrucao inst);
-void executarInstrucao(Instrucao inst);
 void imprimirMemoriaDados();
 int ula(int a, int b, int op);
 int mux(int a, int b, int select);
-void atualizarRegistrador(int registrador, int valor);
-int lerRegistrador(int registrador);
-void atualizarPC(PC *pc);
-void carregarMemoriaParaRegistrador(int endereco_memoria, int registrador);
-void armazenarRegistradorNaMemoria(int registrador, int endereco_memoria);
 PC inicializarPC();
 Instrucao codificarInstrucao(char *instrucao_string);
 
@@ -84,7 +78,6 @@ int main() {
             case 1:
                 carregarMemoria();
                 break;
-
             case 2:
                 imprimirMemoria();
                 break;
@@ -92,28 +85,14 @@ int main() {
             case 3:
                 imprimirRegistradores();
                 break;
-
             case 4:
                 imprimirRegistradores();
                 imprimirMemoriaDados();
                 break;
-
             case 7:
-                printf("Programa executado com sucesso!\n");
-                imprimirRegistradores(); // Imprime os registradores após a execução do programa
-                imprimirMemoriaDados(); // Imprime a memória de dados após a execução do programa
                 break;
-
-            case 8: {
-                // Executa uma instrução
-                // Decodifica a instrução uma vez e armazena em uma variável
-                Instrucao instrucao = codificarInstrucao(memoria_instrucao[pc.endereco_atual]);
-                // Executa a instrução decodificada
-                executarInstrucao(instrucao);
-                // Atualiza o PC após a execução da instrução atual
-                atualizarPC(&pc);
+            case 8: 
                 break;
-            }
             default:
                 printf("Opção inválida! Escolha uma opção válida.\n");
                 // Adicione mais casos para as outras opções
@@ -144,7 +123,7 @@ void carregarMemoria(){
         return;
     }
 
-    int i = 1; // Começa a partir do endereço 1
+    int i = 0; // Começa a partir do endereço 1
     char linha[TAM_INSTRUCAO];
     while(fgets(linha, TAM_INSTRUCAO, arquivo_memoria )){ //enquanto houver linhas no arquivo, leia
         char *pos; // Ponteiro para a posição do caractere de nova linha
@@ -171,7 +150,7 @@ void imprimirMemoria(){
 
 void imprimirMemoriaDados() {
     printf("Conteúdo da memória de dados:\n");
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
         printf("Endereco %d: [%d]\n", i, memoria_dados[i]);
     }
 }
@@ -227,6 +206,7 @@ int ula(int a, int b, int op) {
     }
 }
 
+
 int mux(int a, int b, int select) {
     if(select == 0) {
         return a;
@@ -235,33 +215,7 @@ int mux(int a, int b, int select) {
     }
 }
 
-// Função para atualizar o banco de registradores
-void atualizarRegistrador(int registrador, int valor) {
-    banco_registradores.registradores[registrador] = valor;
-}
 
-// Função para ler o valor de um registrador
-int lerRegistrador(int registrador) {
-    return banco_registradores.registradores[registrador];
-}
-
-// Função para carregar um valor da memória de dados para um registrador
-void carregarMemoriaParaRegistrador(int endereco_memoria, int registrador) {
-    int valor = memoria_dados[endereco_memoria];
-    atualizarRegistrador(registrador, valor);
-}
-
-// Função para armazenar um valor de um registrador na memória de dados
-void armazenarRegistradorNaMemoria(int registrador, int endereco_memoria) {
-    int valor = lerRegistrador(registrador);
-    memoria_dados[endereco_memoria] = valor;
-}
-
-// Atualizar o PC após a execução da instrução atual
-void atualizarPC(PC *pc) {
-    pc->endereco_atual = pc->endereco_proximo;
-    pc->endereco_proximo++;
-}
 
 // Codificar a instrução MIPS
 Instrucao codificarInstrucao(char *instrucao_string) {
@@ -303,24 +257,4 @@ Instrucao codificarInstrucao(char *instrucao_string) {
     imprimirInstrucao(inst); // Chama a função para imprimir os campos da instrução
 
     return inst;
-}
-
-void executarInstrucao(Instrucao inst) {
-    int resultado;
-    switch (inst.tipo) {
-        case R_TYPE:
-            resultado = ula(lerRegistrador(inst.rs), lerRegistrador(inst.rt), inst.funct);
-            atualizarRegistrador(inst.rd, resultado);
-            break;
-        case I_TYPE:
-            resultado = ula(lerRegistrador(inst.rs), inst.imm, inst.opcode);
-            atualizarRegistrador(inst.rt, resultado);
-            break;
-        case J_TYPE:
-            // Não é necessário implementar para J_TYPE no momento
-            break;
-        default:
-            printf("Tipo de instrução não reconhecido: %d\n", inst.tipo);
-            break;
-    }
 }
