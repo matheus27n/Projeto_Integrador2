@@ -39,6 +39,8 @@ typedef struct { // Estrutura para representar o contador de programa (PC)
 
 // Protótipos das funções
 void inicializarBancoRegistradores(BancoRegistradores *banco_registradores);
+void inicializarPC(PC *pc);
+void inicializarMemoriaDados(); // Adicionado protótipo
 void carregarMemoria();
 void imprimirMemoria(char memoria_instrucao[][TAM_INSTRUCAO]);
 void imprimirRegistradores(BancoRegistradores *banco_registradores);
@@ -46,27 +48,29 @@ void imprimirInstrucao(Instrucao inst);
 void imprimirMemoriaDados();
 int ula(int a, int b, int op);
 int mux(int a, int b, int select);
-void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc); //protitipo da função executarInstrução
+void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc); // Protótipo adicionado
 Instrucao codificarInstrucao(char *instrucao_string); // Protótipo adicionado
 
 int main() {
-    int opcao;
-    BancoRegistradores banco_registradores; // Banco de registradores
+    BancoRegistradores banco_registradores;
     PC pc;
-    inicializarBancoRegistradores(&banco_registradores); // Inicializa o banco de registradores
-    inicializarPC(&pc); // Inicializa o contador de programa
+    inicializarBancoRegistradores(&banco_registradores);
+    inicializarPC(&pc);
+    carregarMemoria(); // Carregar a memória de instrução
+    inicializarMemoriaDados();// Inicializar a memória de dados
 
+    int opcao;
     do {
         printf("\nMenu Principal\n"); 
-        printf("1. Carregar memória\n"); 
-        printf("2. Imprimir memória \n"); 
+        printf("1. Carregar memoria\n"); 
+        printf("2. Imprimir memoria \n"); 
         printf("3. Imprimir registradores \n"); 
         printf("4. Imprimir todo o simulador \n"); 
         printf("5. Salvar .asm \n"); 
         printf("6. Salvar .mem \n"); 
         printf("7. Executa Programa (run)\n"); 
-        printf("8. Executa uma instrução (Step)\n"); 
-        printf("9. Volta uma instrução (Back)\n"); 
+        printf("8. Executa uma instrucao (Step)\n"); 
+        printf("9. Volta uma instrucao (Back)\n"); 
         printf("0. Sair \n"); 
         printf("Escolha uma opcao: "); 
         scanf("%d", &opcao);
@@ -86,6 +90,13 @@ int main() {
                 imprimirMemoriaDados();
                 break;
             case 7:
+                // Implemente a execução do programa
+                while (pc.endereco_atual < 12) {
+                    executarInstrucao(codificarInstrucao(memoria_instrucao[pc.endereco_atual]), &banco_registradores, &pc);
+                }
+                imprimirRegistradores(&banco_registradores);
+                imprimirMemoriaDados();
+                printf("Programa executado com sucesso\n");
                 break;
             case 8: 
                 // Implemente a execução de uma instrução
@@ -108,6 +119,13 @@ void inicializarBancoRegistradores(BancoRegistradores *banco_registradores) {
 void inicializarPC(PC *pc) {
     pc->endereco_atual = 0;
     pc->endereco_proximo = 0;
+}
+
+void inicializarMemoriaDados() {
+    // Inicializar a memória de dados com zeros
+    for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
+        memoria_dados[i] = 0;
+    }
 }
 
 void carregarMemoria() {
@@ -142,14 +160,14 @@ void imprimirMemoria(char memoria_instrucao[][TAM_INSTRUCAO]) {
 }
 
 void imprimirMemoriaDados() {
-    printf("Conteúdo da memória de dados:\n");
+    printf("Conteudo da memoria de dados:\n");
     for (int i = 0; i < /*TAM_MEMORIA_DADOS*/ 12; i++) {
         printf("Endereco %d: [%d]\n", i, memoria_dados[i]);
     }
 }
 
 void imprimirRegistradores(BancoRegistradores *banco_registradores) {
-    printf("Conteúdo do banco de registradores:\n");
+    printf("Conteudo do banco de registradores:\n");
     for (int i = 0; i < TAM_REGISTRADORES; i++) {
         printf("R%d: %d\n", i, banco_registradores->registradores[i]);
     }
@@ -160,10 +178,10 @@ void imprimirInstrucao(Instrucao inst) {
         case R_TYPE:
             printf("Tipo: R_TYPE\n");
             printf("Opcode: %d\n", inst.opcode);
-            printf("Rs (origem): %d\n", inst.rs);
-            printf("Rt (origem): %d\n", inst.rt);
-            printf("Rd (destino): %d\n", inst.rd);
-            printf("Funct (aritimetica): %d\n", inst.funct);
+            printf("Rs (Origem): %d\n", inst.rs);
+            printf("Rt (Destino): %d\n", inst.rt);
+            printf("Rd (Destino): %d\n", inst.rd);
+            printf("Funct (Funcao(AND/SUB)): %d\n", inst.funct);
             break;
         case I_TYPE:
             printf("Tipo: I_TYPE\n");
@@ -249,33 +267,32 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
         case R_TYPE:
             // Execução das instruções do tipo R
             switch (inst.funct) {
-                case 0x20: // add
+                case 0:  // add
                     banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] + banco_registradores->registradores[inst.rt];
                     break;
-                case 0x22: // sub
+                case 2: // sub 
                     banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] - banco_registradores->registradores[inst.rt];
                     break;
-                case 0x24: // and
+                case 4: // and
                     banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] & banco_registradores->registradores[inst.rt];
                     break;
-                case 0x25: // or
+                case 5: // or
                     banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] | banco_registradores->registradores[inst.rt];
                     break;
                 // Adicione mais casos conforme necessário
                 default:
-                    printf("Função R nao reconhecida: %d\n", inst.funct);
+                    printf("Funcao R nao reconhecida: %d\n", inst.funct);
                     break;
             }
             break;
-        case I_TYPE:
+         case I_TYPE:
             // Execução das instruções do tipo I
             switch (inst.opcode) {
-                case 0x8: // addi
+                case 8: // addi
                     banco_registradores->registradores[inst.rt] = banco_registradores->registradores[inst.rs] + inst.imm;
+                    memoria_dados[inst.rt] = banco_registradores->registradores[inst.rt];// Atualizar a memória de dados
                     break;
-                default:
-                    printf("Opcode I nao reconhecido: %d\n", inst.opcode);
-                    break;
+                // Outros casos...
             }
             break;
         case J_TYPE:
@@ -284,7 +301,8 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
             break;
     }
 
-    // Avançar para a próxima instrução
-    pc->endereco_atual = pc->endereco_proximo;
+    pc->endereco_atual = pc->endereco_proximo; // Atualizar o endereço atual
     pc->endereco_proximo++; // Avançar para a próxima instrução na sequência
+        printf("PC atual: %d\n", pc->endereco_atual);
+        printf("PC próximo: %d\n", pc->endereco_proximo);
 }
