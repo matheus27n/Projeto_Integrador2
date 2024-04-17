@@ -129,7 +129,7 @@ void inicializarMemoriaDados() {
 }
 
 void carregarMemoria() {
-    FILE *arquivo_memoria = fopen("C:\\Users\\Matheus\\Desktop\\MINI MIPS 8 BITS\\Mini_mips_v2\\instrucoes.txt", "r");
+    FILE *arquivo_memoria = fopen("C:\\Users\\Matheus\\Desktop\\MINI MIPS 8 BITS\\instrucoes.txt", "r");
     if (arquivo_memoria == NULL) {
         printf("Erro ao abrir o arquivo\n");
         return;
@@ -304,5 +304,5 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
     pc->endereco_atual = pc->endereco_proximo; // Atualizar o endereço atual
     pc->endereco_proximo++; // Avançar para a próxima instrução na sequência
         printf("PC atual: %d\n", pc->endereco_atual);
-        printf("PC próximo: %d\n", pc->endereco_proximo); 
+        printf("PC próximo: %d\n", pc->endereco_proximo);
 }
