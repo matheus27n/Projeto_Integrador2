@@ -221,21 +221,21 @@ Instrucao codificarInstrucao(char *instrucao_string) {
     // Extrai os campos da instrução com base nos tipos R, I e J
     switch (inst.tipo) {
         case R_TYPE:
-            inst.opcode = (instrucao_int >> 12) & 0xF; //0xF representa os 4 bits mais significativos
-            inst.rs = (instrucao_int >> 9) & 0x7; //0x7 representa os 3 bits mais significativos
-            inst.rt = (instrucao_int >> 6) & 0x7; //0x7 representa os 3 bits mais significativos
-            inst.rd = (instrucao_int >> 3) & 0x7; //0x7 representa os 3 bits mais significativos
-            inst.funct = instrucao_int & 0x7; //0x7 representa os 3 bits mais significativos
+            inst.opcode = (instrucao_int >> 12) & 0xF; // 4 bits mais significativos
+            inst.rs = (instrucao_int >> 9) & 0x7; // 3 bits seguintes
+            inst.rt = (instrucao_int >> 6) & 0x7; // 3 bits seguintes
+            inst.rd = (instrucao_int >> 3) & 0x7; // 3 bits seguintes
+            inst.funct = instrucao_int & 0x7; // 3 bits menos significativos
             break;
         case I_TYPE:
-            inst.opcode = (instrucao_int >> 12) & 0xF;
-            inst.rs = (instrucao_int >> 9) & 0x7;
-            inst.rt = (instrucao_int >> 6) & 0x7;
-            inst.imm = instrucao_int & 0x3F; // Valor imediato de 6 bits
+            inst.opcode = (instrucao_int >> 12) & 0xF; // 4 bits mais significativos
+            inst.rs = (instrucao_int >> 9) & 0x7; // 3 bits seguintes
+            inst.rt = (instrucao_int >> 6) & 0x7; // 3 bits seguintes
+            inst.imm = instrucao_int & 0x3F; // 6 bits menos significativos
             break;
         case J_TYPE:
-            inst.opcode = (instrucao_int >> 12) & 0xF;
-            inst.addr = instrucao_int & 0xFFF; // Endereço de 12 bits
+            inst.opcode = (instrucao_int >> 12) & 0xF; // 4 bits mais significativos
+            inst.addr = instrucao_int & 0xFFF; // 12 bits menos significativos
             break;
     }
     imprimirInstrucao(inst); // Chama a função para imprimir os campos da instrução
@@ -263,7 +263,7 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
                     break;
                 // Adicione mais casos conforme necessário
                 default:
-                    printf("Função R não reconhecida: %d\n", inst.funct);
+                    printf("Função R nao reconhecida: %d\n", inst.funct);
                     break;
             }
             break;
@@ -274,7 +274,7 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
                     banco_registradores->registradores[inst.rt] = banco_registradores->registradores[inst.rs] + inst.imm;
                     break;
                 default:
-                    printf("Opcode I não reconhecido: %d\n", inst.opcode);
+                    printf("Opcode I nao reconhecido: %d\n", inst.opcode);
                     break;
             }
             break;
