@@ -4,7 +4,7 @@
 
 #define TAM_MEMORIA 256 // Tamanho da memória 
 #define TAM_REGISTRADORES 8 // Ajustado para incluir o registrador $SW
-#define TAM_INSTRUCAO 18 // 17 caracteres + 1 para o caractere nulo
+#define TAM_INSTRUCAO 16 // Tamanho da instrução MIPS
 #define TAM_MEMORIA_DADOS 256 // Tamanho da memória de dados
 
 char memoria_instrucao[TAM_MEMORIA][TAM_INSTRUCAO]; // Matriz de caracteres para armazenar as instruções
@@ -39,7 +39,7 @@ typedef struct { // Estrutura para representar o contador de programa (PC)
 
 // Protótipos das funções
 void inicializarBancoRegistradores();
-void carregarMemoria();
+void carregarMemoria(FILE *arquivo_memoria);
 void imprimirMemoria();
 void imprimirRegistradores();
 void imprimirInstrucao(Instrucao inst);
@@ -48,14 +48,12 @@ int ula(int a, int b, int op);
 int mux(int a, int b, int select);
 PC inicializarPC();
 Instrucao codificarInstrucao(char *instrucao_string);
-
-
 PC pc; // Contador de programa (PC)
-BancoRegistradores banco_registradores; // Variável global para o banco de registradores
+BancoRegistradores banco_registradores; // Banco de registradores
 
 int main() {
     int opcao;
-
+    FILE *arquivo_memoria = NULL; // Inicializa o ponteiro de arquivo como NULL
     inicializarBancoRegistradores(); // Inicializa o banco de registradores
     pc = inicializarPC(); // Inicializa o PC
 
@@ -76,7 +74,7 @@ int main() {
      
         switch (opcao) {
             case 1:
-                carregarMemoria();
+                carregarMemoria(arquivo_memoria);
                 break;
             case 2:
                 imprimirMemoria();
@@ -102,7 +100,6 @@ int main() {
 }
 
 void inicializarBancoRegistradores() {
-    // Inicializa todos os registradores com zero
     for(int i = 0; i < TAM_REGISTRADORES; i++) {
         banco_registradores.registradores[i] = 0;
     }
@@ -116,8 +113,11 @@ PC inicializarPC() {
 }
 
 //CARREGAR MEMÓRIA
-void carregarMemoria(){
-    FILE *arquivo_memoria = fopen("C:\\Users\\Matheus\\Desktop\\MINI MIPS 8 BITS\\programaTestaInstrucoes2.txt", "r");
+void carregarMemoria(FILE *arquivo_memoria){
+    printf("Informe o nome do arquivo: ");
+    char nome_arquivo[50];
+    scanf("%s", nome_arquivo);
+    arquivo_memoria = fopen(nome_arquivo, "r");
     if(arquivo_memoria == NULL){
         printf("Erro ao abrir o arquivo\n");
         return;
