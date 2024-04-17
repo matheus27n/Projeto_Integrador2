@@ -39,7 +39,7 @@ typedef struct { // Estrutura para representar o contador de programa (PC)
 
 // Protótipos das funções
 void inicializarBancoRegistradores();
-void carregarMemoria(FILE *arquivo_memoria);
+void carregarMemoria();
 void imprimirMemoria();
 void imprimirRegistradores();
 void imprimirInstrucao(Instrucao inst);
@@ -53,7 +53,7 @@ BancoRegistradores banco_registradores; // Banco de registradores
 
 int main() {
     int opcao;
-    FILE *arquivo_memoria = NULL; // Inicializa o ponteiro de arquivo como NULL
+
     inicializarBancoRegistradores(); // Inicializa o banco de registradores
     pc = inicializarPC(); // Inicializa o PC
 
@@ -74,12 +74,11 @@ int main() {
      
         switch (opcao) {
             case 1:
-                carregarMemoria(arquivo_memoria);
+                carregarMemoria();
                 break;
             case 2:
                 imprimirMemoria();
                 break;
-
             case 3:
                 imprimirRegistradores();
                 break;
@@ -113,7 +112,8 @@ PC inicializarPC() {
 }
 
 //CARREGAR MEMÓRIA
-void carregarMemoria(FILE *arquivo_memoria){
+void carregarMemoria(){
+    FILE *arquivo_memoria;
     printf("Informe o nome do arquivo: ");
     char nome_arquivo[50];
     scanf("%s", nome_arquivo);
