@@ -4,7 +4,7 @@
 
 #define TAM_MEMORIA 256 // Tamanho da memória 
 #define TAM_REGISTRADORES 8 // Ajustado para incluir o registrador $SW
-#define TAM_INSTRUCAO 16 // Tamanho da instrução MIPS
+#define TAM_INSTRUCAO 17 // 16 bits + 1 para o caractere nulo
 #define TAM_MEMORIA_DADOS 256 // Tamanho da memória de dados
 
 char memoria_instrucao[TAM_MEMORIA][TAM_INSTRUCAO]; // Matriz de caracteres para armazenar as instruções
@@ -38,24 +38,22 @@ typedef struct { // Estrutura para representar o contador de programa (PC)
 } PC;
 
 // Protótipos das funções
-void inicializarBancoRegistradores();
+void inicializarBancoRegistradores(BancoRegistradores *banco_registradores);
 void carregarMemoria();
-void imprimirMemoria();
-void imprimirRegistradores();
+void imprimirMemoria(char memoria_instrucao[][TAM_INSTRUCAO]);
+void imprimirRegistradores(BancoRegistradores *banco_registradores);
 void imprimirInstrucao(Instrucao inst);
 void imprimirMemoriaDados();
 int ula(int a, int b, int op);
 int mux(int a, int b, int select);
-PC inicializarPC();
-Instrucao codificarInstrucao(char *instrucao_string);
-PC pc; // Contador de programa (PC)
-BancoRegistradores banco_registradores; // Banco de registradores
+Instrucao codificarInstrucao(char *instrucao_string); // Protótipo adicionado
 
 int main() {
     int opcao;
-
-    inicializarBancoRegistradores(); // Inicializa o banco de registradores
-    pc = inicializarPC(); // Inicializa o PC
+    BancoRegistradores banco_registradores; // Banco de registradores
+    PC pc;
+    inicializarBancoRegistradores(&banco_registradores); // Inicializa o banco de registradores
+    inicializarPC(&pc); // Inicializa o contador de programa
 
     do {
         printf("\nMenu Principal\n"); 
@@ -69,7 +67,7 @@ int main() {
         printf("8. Executa uma instrução (Step)\n"); 
         printf("9. Volta uma instrução (Back)\n"); 
         printf("0. Sair \n"); 
-        printf("Escolha uma opção: "); 
+        printf("Escolha uma opcao: "); 
         scanf("%d", &opcao);
      
         switch (opcao) {
@@ -77,13 +75,13 @@ int main() {
                 carregarMemoria();
                 break;
             case 2:
-                imprimirMemoria();
+                imprimirMemoria(memoria_instrucao);
                 break;
             case 3:
-                imprimirRegistradores();
+                imprimirRegistradores(&banco_registradores);
                 break;
             case 4:
-                imprimirRegistradores();
+                imprimirRegistradores(&banco_registradores);
                 imprimirMemoriaDados();
                 break;
             case 7:
@@ -98,36 +96,29 @@ int main() {
     return 0;
 }
 
-void inicializarBancoRegistradores() {
+void inicializarBancoRegistradores(BancoRegistradores *banco_registradores) {
     for(int i = 0; i < TAM_REGISTRADORES; i++) {
-        banco_registradores.registradores[i] = 0;
+        banco_registradores->registradores[i] = 0;
     }
 }
 
-PC inicializarPC() {
-    PC pc;
-    pc.endereco_atual = 0;
-    pc.endereco_proximo = 0;
-    return pc;
+void inicializarPC(PC *pc) {
+    pc->endereco_atual = 0;
+    pc->endereco_proximo = 0;
 }
 
-//CARREGAR MEMÓRIA
-void carregarMemoria(){
-    FILE *arquivo_memoria;
-    printf("Informe o nome do arquivo: ");
-    char nome_arquivo[50];
-    scanf("%s", nome_arquivo);
-    arquivo_memoria = fopen(nome_arquivo, "r");
-    if(arquivo_memoria == NULL){
+void carregarMemoria() {
+    FILE *arquivo_memoria = fopen("C:\\Users\\Matheus\\Desktop\\MINI MIPS 8 BITS\\Mini_mips_v2\\instrucoes.txt", "r");
+    if (arquivo_memoria == NULL) {
         printf("Erro ao abrir o arquivo\n");
         return;
     }
 
-    int i = 0; // Começa a partir do endereço 1
-    char linha[TAM_INSTRUCAO];
-    while(fgets(linha, TAM_INSTRUCAO, arquivo_memoria )){ //enquanto houver linhas no arquivo, leia
+    int i = 0; // Começa a partir do endereço 0
+    char linha[TAM_INSTRUCAO + 1]; // +1 para o caractere nulo
+    while (fgets(linha, TAM_INSTRUCAO + 1, arquivo_memoria)) {
         char *pos; // Ponteiro para a posição do caractere de nova linha
-        if((pos = strchr(linha, '\n')) != NULL){ // Verifica se o caractere de nova linha está presente
+        if ((pos = strchr(linha, '\n')) != NULL) {
             *pos = '\0'; // Substitui o caractere de nova linha por nulo
         }
         strncpy(memoria_instrucao[i], linha, TAM_INSTRUCAO); // Copia a linha para a memória de instrução
@@ -137,10 +128,9 @@ void carregarMemoria(){
     printf("Memoria carregada com sucesso\n");
 }
 
-//IMPRIMIR MEMÓRIA
-void imprimirMemoria(){
+void imprimirMemoria(char memoria_instrucao[][TAM_INSTRUCAO]) {
     printf("Conteudo da memoria:\n");
-    for(int i = 1; i < 12; i++){
+    for (int i = 0; i < /*TAM_MEMORIA_DADOS*/ 12; i++) {
         printf("Endereco %d: %s\n", i, memoria_instrucao[i]);
         // Decodifica e imprime a instrução
         codificarInstrucao(memoria_instrucao[i]);
@@ -150,35 +140,34 @@ void imprimirMemoria(){
 
 void imprimirMemoriaDados() {
     printf("Conteúdo da memória de dados:\n");
-    for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
+    for (int i = 0; i < /*TAM_MEMORIA_DADOS*/ 12; i++) {
         printf("Endereco %d: [%d]\n", i, memoria_dados[i]);
     }
 }
-//IMPRIMIR REGISTRADORES
-void imprimirRegistradores() {
+
+void imprimirRegistradores(BancoRegistradores *banco_registradores) {
     printf("Conteúdo do banco de registradores:\n");
-    for(int i = 0; i < TAM_REGISTRADORES; i++) {
-        printf("R%d: %d\n", i, banco_registradores.registradores[i]);
+    for (int i = 0; i < TAM_REGISTRADORES; i++) {
+        printf("R%d: %d\n", i, banco_registradores->registradores[i]);
     }
 }
 
-// Imprimir os campos da instrução com base no tipo
 void imprimirInstrucao(Instrucao inst) {
     switch (inst.tipo) {
         case R_TYPE:
             printf("Tipo: R_TYPE\n");
             printf("Opcode: %d\n", inst.opcode);
-            printf("Rs: %d\n", inst.rs);
-            printf("Rt: %d\n", inst.rt);
-            printf("Rd: %d\n", inst.rd);
-            printf("Funct: %d\n", inst.funct);
+            printf("Rs (origem): %d\n", inst.rs);
+            printf("Rt (origem): %d\n", inst.rt);
+            printf("Rd (destino): %d\n", inst.rd);
+            printf("Funct (aritimetica): %d\n", inst.funct);
             break;
         case I_TYPE:
             printf("Tipo: I_TYPE\n");
             printf("Opcode: %d\n", inst.opcode);
-            printf("Rs: %d\n", inst.rs);
-            printf("Rt: %d\n", inst.rt);
-            printf("Imm: %d\n", inst.imm);
+            printf("Rs (origem): %d\n", inst.rs);
+            printf("Rt (origem): %d\n", inst.rt);
+            printf("Imediato: %d\n", inst.imm);
             break;
         case J_TYPE:
             printf("Tipo: J_TYPE\n");
@@ -188,9 +177,8 @@ void imprimirInstrucao(Instrucao inst) {
     }
 }
 
-// Funções da ULA e MUX
 int ula(int a, int b, int op) {
-    switch(op) {
+    switch (op) {
         case 0: // ADD
             return a + b;
         case 1: // SUB
@@ -206,21 +194,16 @@ int ula(int a, int b, int op) {
     }
 }
 
-
 int mux(int a, int b, int select) {
-    if(select == 0) {
+    if (select == 0) {
         return a;
     } else {
         return b;
     }
 }
 
-
-
-// Codificar a instrução MIPS
 Instrucao codificarInstrucao(char *instrucao_string) {
     Instrucao inst;
-    
     unsigned int instrucao_int = strtol(instrucao_string, NULL, 2); //converte para inteiro
     
     // Determina o tipo de instrução com base no opcode
@@ -232,7 +215,6 @@ Instrucao codificarInstrucao(char *instrucao_string) {
     } else {
         inst.tipo = I_TYPE;
     }
-
     // Extrai os campos da instrução com base nos tipos R, I e J
     switch (inst.tipo) {
         case R_TYPE:
@@ -253,8 +235,6 @@ Instrucao codificarInstrucao(char *instrucao_string) {
             inst.addr = instrucao_int & 0xFFF; // Endereço de 12 bits
             break;
     }
-
     imprimirInstrucao(inst); // Chama a função para imprimir os campos da instrução
-
     return inst;
 }
