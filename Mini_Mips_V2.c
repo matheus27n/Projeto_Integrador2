@@ -46,6 +46,7 @@ void imprimirInstrucao(Instrucao inst);
 void imprimirMemoriaDados();
 int ula(int a, int b, int op);
 int mux(int a, int b, int select);
+void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc); //protitipo da função executarInstrução
 Instrucao codificarInstrucao(char *instrucao_string); // Protótipo adicionado
 
 int main() {
@@ -87,6 +88,8 @@ int main() {
             case 7:
                 break;
             case 8: 
+                // Implemente a execução de uma instrução
+                executarInstrucao(codificarInstrucao(memoria_instrucao[pc.endereco_atual]), &banco_registradores, &pc);
                 break;
             default:
                 printf("Opção inválida! Escolha uma opção válida.\n");
@@ -205,7 +208,7 @@ int mux(int a, int b, int select) {
 Instrucao codificarInstrucao(char *instrucao_string) {
     Instrucao inst;
     unsigned int instrucao_int = strtol(instrucao_string, NULL, 2); //converte para inteiro
-    
+
     // Determina o tipo de instrução com base no opcode
     int opcode = (instrucao_int >> 12) & 0xF; //intrucao_int >> 12 significa que estamos deslocando 12 bits para a direita
     if (opcode == 0) {
@@ -237,4 +240,51 @@ Instrucao codificarInstrucao(char *instrucao_string) {
     }
     imprimirInstrucao(inst); // Chama a função para imprimir os campos da instrução
     return inst;
+}
+
+// Implemente as funções para executar o programa e as instruções
+void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc) {
+    
+    switch (inst.tipo) {
+        case R_TYPE:
+            // Execução das instruções do tipo R
+            switch (inst.funct) {
+                case 0x20: // add
+                    banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] + banco_registradores->registradores[inst.rt];
+                    break;
+                case 0x22: // sub
+                    banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] - banco_registradores->registradores[inst.rt];
+                    break;
+                case 0x24: // and
+                    banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] & banco_registradores->registradores[inst.rt];
+                    break;
+                case 0x25: // or
+                    banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] | banco_registradores->registradores[inst.rt];
+                    break;
+                // Adicione mais casos conforme necessário
+                default:
+                    printf("Função R não reconhecida: %d\n", inst.funct);
+                    break;
+            }
+            break;
+        case I_TYPE:
+            // Execução das instruções do tipo I
+            switch (inst.opcode) {
+                case 0x8: // addi
+                    banco_registradores->registradores[inst.rt] = banco_registradores->registradores[inst.rs] + inst.imm;
+                    break;
+                default:
+                    printf("Opcode I não reconhecido: %d\n", inst.opcode);
+                    break;
+            }
+            break;
+        case J_TYPE:
+            // Execução das instruções do tipo J
+            printf("Executando instrução do tipo J\n");
+            break;
+    }
+
+    // Avançar para a próxima instrução
+    pc->endereco_atual = pc->endereco_proximo;
+    pc->endereco_proximo++; // Avançar para a próxima instrução na sequência
 }
