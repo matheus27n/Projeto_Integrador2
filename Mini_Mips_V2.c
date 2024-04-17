@@ -304,5 +304,5 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
     pc->endereco_atual = pc->endereco_proximo; // Atualizar o endereço atual
     pc->endereco_proximo++; // Avançar para a próxima instrução na sequência
         printf("PC atual: %d\n", pc->endereco_atual);
-        printf("PC próximo: %d\n", pc->endereco_proximo);
+        printf("PC próximo: %d\n", pc->endereco_proximo); 
 }
