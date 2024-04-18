@@ -37,10 +37,10 @@ typedef struct { // Estrutura para representar o contador de programa (PC)
     int endereco_proximo; // Endereço da próxima instrução a ser executada
 } PC;
 
-// Protótipos das funções
+//funções
 void inicializarBancoRegistradores(BancoRegistradores *banco_registradores);
 void inicializarPC(PC *pc);
-void inicializarMemoriaDados(); // Adicionado protótipo
+void inicializarMemoriaDados(); 
 void carregarMemoria();
 void imprimirMemoria(char memoria_instrucao[][TAM_INSTRUCAO]);
 void imprimirRegistradores(BancoRegistradores *banco_registradores);
@@ -48,11 +48,11 @@ void imprimirInstrucao(Instrucao inst);
 void imprimirMemoriaDados();
 int ula(int a, int b, int op);
 int mux(int a, int b, int select);
-void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc); // Protótipo adicionado
-void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm);
+void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc); // Protótipo 
+//void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm);
 void salvar_mem();
 void salvar_asm();
-Instrucao codificarInstrucao(char *instrucao_string); // Protótipo adicionado
+Instrucao codificarInstrucao(char *instrucao_string); // Protótipo ainda
 
 int main() {
     BancoRegistradores banco_registradores;
@@ -99,8 +99,7 @@ int main() {
                 salvar_mem();
                 break;
             case 7:
-                // Implemente a execução do programa
-                while (pc.endereco_atual < 12) {
+                while (pc.endereco_atual < 12) { //12 instruções por que é verão teste
                     executarInstrucao(codificarInstrucao(memoria_instrucao[pc.endereco_atual]), &banco_registradores, &pc);
                 }
                 imprimirRegistradores(&banco_registradores);
@@ -158,9 +157,11 @@ void carregarMemoria() {
     printf("Memoria carregada com sucesso\n");
 }
 
+
+
 void imprimirMemoria(char memoria_instrucao[][TAM_INSTRUCAO]) {
     printf("Conteudo da memoria:\n");
-    for (int i = 0; i < /*TAM_MEMORIA_DADOS*/ 12; i++) {
+    for (int i = 0; i < /*TAM_MEMORIA_DADOS*/ 12; i++) { //12 instruções por que é verão teste
         printf("Endereco %d: %s\n", i, memoria_instrucao[i]);
         // Decodifica e imprime a instrução
         codificarInstrucao(memoria_instrucao[i]);
@@ -192,9 +193,9 @@ void salvar_asm() {
 
     // Iterar sobre cada instrução na memória e converter para assembly
     for (int i = 0; i < TAM_MEMORIA; i++) {
-        if (strcmp(memoria_instrucao[i], "") != 0) { // Verifica se a instrução não está vazia
-            fprintf(arquivo_asm, "Instrução %d: ", i);
-            fprintf(arquivo_asm, "%s\n", memoria_instrucao[i]);
+        if (strcmp(memoria_instrucao[i], "") != 0) { // strcmp faz a comparação de strings
+            fprintf(arquivo_asm, "Instrução %d: ", i); // Escrever o número da instrução
+            fprintf(arquivo_asm, "%s\n", memoria_instrucao[i]); // Escrever a instrução binária
         }
     }
 
@@ -203,7 +204,7 @@ void salvar_asm() {
 }
 
 // Função para converter uma instrução binária em assembly
-void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm) {
+/*void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm) {
     // Extrair o opcode da instrução binária
     int opcode = (instrucao_binaria[0] - '0') * 8 + (instrucao_binaria[1] - '0') * 4 + (instrucao_binaria[2] - '0') * 2 + (instrucao_binaria[3] - '0');
 
@@ -233,7 +234,7 @@ void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm) {
             fprintf(arquivo_asm, "Instrução inválida\n");
             break;
     }
-}
+}*/
 
 
 // Função para salvar em um arquivo ".mem"
@@ -312,7 +313,7 @@ Instrucao codificarInstrucao(char *instrucao_string) {
     unsigned int instrucao_int = strtol(instrucao_string, NULL, 2); //converte para inteiro
 
     // Determina o tipo de instrução com base no opcode
-    int opcode = (instrucao_int >> 12) & 0xF; //intrucao_int >> 12 significa que estamos deslocando 12 bits para a direita
+    int opcode = (instrucao_int >> 12) & 0xF; //intrucao_int >> 12 significa que estamos deslocando 12 bits para a direita e pega os 4 bits mais significativos
     if (opcode == 0) {
         inst.tipo = R_TYPE;
     } else if (opcode == 2 || opcode == 3) {
@@ -386,7 +387,7 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
     }
 
     pc->endereco_atual = pc->endereco_proximo; // Atualizar o endereço atual
-    pc->endereco_proximo++; // Avançar para a próxima instrução na sequência
+    pc->endereco_proximo++; //o prox endereço deve vir da proxima instrução //PROTOTIPO AINDA
         printf("PC atual: %d\n", pc->endereco_atual);
         printf("PC próximo: %d\n", pc->endereco_proximo);
 }
