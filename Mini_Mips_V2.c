@@ -49,6 +49,9 @@ void imprimirMemoriaDados();
 int ula(int a, int b, int op);
 int mux(int a, int b, int select);
 void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc); // Protótipo adicionado
+void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm);
+void salvar_mem();
+void salvar_asm();
 Instrucao codificarInstrucao(char *instrucao_string); // Protótipo adicionado
 
 int main() {
@@ -88,6 +91,12 @@ int main() {
             case 4:
                 imprimirRegistradores(&banco_registradores);
                 imprimirMemoriaDados();
+                break;
+            case 5:
+                salvar_asm();
+                break;
+            case 6:
+                salvar_mem();
                 break;
             case 7:
                 // Implemente a execução do programa
@@ -172,6 +181,81 @@ void imprimirRegistradores(BancoRegistradores *banco_registradores) {
         printf("R%d: %d\n", i, banco_registradores->registradores[i]);
     }
 }
+
+// Função para salvar em um arquivo ".asm"
+void salvar_asm() {
+    FILE *arquivo_asm = fopen("programa.asm", "w");
+    if (arquivo_asm == NULL) {
+        printf("Erro ao criar o arquivo\n");
+        return;
+    }
+
+    // Iterar sobre cada instrução na memória e converter para assembly
+    for (int i = 0; i < TAM_MEMORIA; i++) {
+        if (strcmp(memoria_instrucao[i], "") != 0) { // Verifica se a instrução não está vazia
+            fprintf(arquivo_asm, "Instrução %d: ", i);
+            fprintf(arquivo_asm, "%s\n", memoria_instrucao[i]);
+        }
+    }
+
+    fclose(arquivo_asm);
+    printf("Arquivo .asm salvo com sucesso!\n");
+}
+
+// Função para converter uma instrução binária em assembly
+void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm) {
+    // Extrair o opcode da instrução binária
+    int opcode = (instrucao_binaria[0] - '0') * 8 + (instrucao_binaria[1] - '0') * 4 + (instrucao_binaria[2] - '0') * 2 + (instrucao_binaria[3] - '0');
+
+    // Verificar o opcode e converter para instrução assembly correspondente
+    switch(opcode) {
+        case 0: // ADD
+            fprintf(arquivo_asm, "ADD ");
+            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
+            break;
+        case 1: // SUB
+            fprintf(arquivo_asm, "SUB ");
+            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
+            break;
+        case 2: // AND
+            fprintf(arquivo_asm, "AND ");
+            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
+            break;
+        case 3: // OR
+            fprintf(arquivo_asm, "OR ");
+            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
+            break;
+        case 4: // XOR
+            fprintf(arquivo_asm, "XOR ");
+            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
+            break;
+        default:
+            fprintf(arquivo_asm, "Instrução inválida\n");
+            break;
+    }
+}
+
+
+// Função para salvar em um arquivo ".mem"
+void salvar_mem() {
+    FILE *arquivo_mem = fopen("memoria.mem", "w");
+    if (arquivo_mem == NULL) {
+        printf("Erro ao criar o arquivo\n");
+        return;
+    }
+
+    // Escrever o estado atual da memória no arquivo .mem
+    for (int i = 0; i < TAM_MEMORIA; i++) {
+        for (int j = 0; j < TAM_INSTRUCAO; j++) {
+            fprintf(arquivo_mem, "%c ", memoria_instrucao[i][j]);
+        }
+        fprintf(arquivo_mem, "\n");
+    }
+
+    fclose(arquivo_mem);
+    printf("Arquivo .mem salvo com sucesso!\n");
+}
+
 
 void imprimirInstrucao(Instrucao inst) {
     switch (inst.tipo) {
