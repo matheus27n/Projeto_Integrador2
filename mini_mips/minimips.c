@@ -4,6 +4,9 @@
 
 // FUNÇÕES GERAIS
 
+char memoria_instrucao[TAM_MEMORIA][TAM_INSTRUCAO]; // Definição das variáveis
+int memoria_dados[TAM_MEMORIA_DADOS]; // Definição das variáveis
+
 int menu(){
     int m;
     printf("\n================================\n");

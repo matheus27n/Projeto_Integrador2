@@ -5,8 +5,9 @@
 #define TAM_INSTRUCAO 17 // 16 bits + 1 para o caractere nulo
 #define TAM_MEMORIA_DADOS 256 // Tamanho da memória de dados
 
-char memoria_instrucao[TAM_MEMORIA][TAM_INSTRUCAO]; // Matriz de caracteres para armazenar as instruções
-int memoria_dados[TAM_MEMORIA_DADOS]; // Vetor de inteiros para armazenar os dados
+extern char memoria_instrucao[TAM_MEMORIA][TAM_INSTRUCAO]; // Declaração externa das variáveis
+extern int memoria_dados[TAM_MEMORIA_DADOS]; // Declaração externa das variáveis
+
 
 typedef enum { // Enumeração para os tipos de instrução
     R_TYPE,
