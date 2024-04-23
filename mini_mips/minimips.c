@@ -92,36 +92,52 @@ Instrucao codificarInstrucao(char *instrucao_string){
 }
 
 // Conversor de instrução binária em assembly
-void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm) {
-    // Extrai o opcode da instrução binária
-    //pegar a instrução e converter para decimal apenas os 4 primeiros bits
-    int opcode = (instrucao_binaria[0] - '0') * 8 + (instrucao_binaria[1] - '0') * 4 + (instrucao_binaria[2] - '0') * 2 + (instrucao_binaria[3] - '0'); 
-    // Verifica o opcode e converter para instrução assembly correspondente
-    switch(opcode) {
-        case 0: // ADD
-            fprintf(arquivo_asm, "ADD ");
-            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
+// Conversor de instrução binária em assembly
+void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm, Instrucao inst) {
+    switch (inst.tipo) {
+        case R_TYPE:
+            switch (inst.funct) {
+                case 0:
+                    fprintf(arquivo_asm, "add R%d, R%d, R%d", inst.rd, inst.rs, inst.rt);
+                    break;
+                case 2:
+                    fprintf(arquivo_asm, "sub R%d, R%d, R%d", inst.rd, inst.rs, inst.rt);
+                    break;
+                case 4:
+                    fprintf(arquivo_asm, "and R%d, R%d, R%d", inst.rd, inst.rs, inst.rt);
+                    break;
+                case 5:
+                    fprintf(arquivo_asm, "or R%d, R%d, R%d", inst.rd, inst.rs, inst.rt);
+                    break;
+                default:
+                    fprintf(arquivo_asm, "Funcao R nao reconhecida: %d", inst.funct);
+                    break;
+            }
             break;
-        case 1: // SUB
-            fprintf(arquivo_asm, "SUB ");
-            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
+        case I_TYPE:
+            switch (inst.opcode) {
+                case 4:
+                    fprintf(arquivo_asm, "addi R%d, R%d, %d", inst.rt, inst.rs, inst.imm);
+                    break;
+                case 11:
+                    fprintf(arquivo_asm, "lw R%d, %d(R%d)", inst.rt, inst.imm, inst.rs);
+                    break;
+                case 15:
+                    fprintf(arquivo_asm, "sw R%d, %d(R%d)", inst.rt, inst.imm, inst.rs);
+                    break;
+                case 8:
+                    fprintf(arquivo_asm, "beq R%d, R%d, %d", inst.rt, inst.rs, inst.imm);
+                    break;
+                default:
+                    fprintf(arquivo_asm, "Opcode I nao reconhecido: %d", inst.opcode);
+                    break;
+            }
             break;
-        case 2: // AND
-            fprintf(arquivo_asm, "AND ");
-            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
-            break;
-        case 3: // OR
-            fprintf(arquivo_asm, "OR ");
-            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
-            break;
-        case 4: // XOR
-            fprintf(arquivo_asm, "XOR ");
-            fprintf(arquivo_asm, "r%d, r%d, r%d\n", instrucao_binaria[4] - '0', instrucao_binaria[5] - '0', instrucao_binaria[6] - '0');
-            break;
-        default:
-            fprintf(arquivo_asm, "Instrucao invalida\n");
+        case J_TYPE:
+            fprintf(arquivo_asm, "j %d", inst.addr);
             break;
     }
+
 }
 
 // Implemente as funções para executar o programa e as instruções
@@ -230,8 +246,6 @@ void carregarMemoria() {
     printf("Memoria carregada com sucesso\n");
 }
 
-
-
 // FUNÇÕES DE SALVAMENTO
 
 // Salvar instruções em .asm
@@ -243,10 +257,9 @@ void salvar_asm() {
     }
     // Iterar sobre cada instrução na memória e converter para assembly
     for (int i = 0; i < TAM_MEMORIA; i++) {
-        if (strcmp(memoria_instrucao[i], "") != 0) { // Verifica se a instrução não está vazia
-            fprintf(arquivo_asm, "Instrucao %d: ", i);
-            fprintf(arquivo_asm, "%s\n", memoria_instrucao[i]);
-        }
+        //void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm, Instrucao inst)
+        converter_asm(memoria_instrucao[i], arquivo_asm, codificarInstrucao(memoria_instrucao[i]));
+        fprintf(arquivo_asm, "\n");
     }
 
     fclose(arquivo_asm);

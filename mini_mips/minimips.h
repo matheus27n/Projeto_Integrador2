@@ -49,7 +49,7 @@ void imprimirMemoriaDados();
 int ula(int a, int b, int op);
 int mux(int a, int b, int select);
 void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc); // Protótipo adicionado
-void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm);
+void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm, Instrucao inst);
 void salvar_mem();
 void salvar_asm();
 Instrucao codificarInstrucao(char *instrucao_string); // Protótipo adicionado
