@@ -216,7 +216,7 @@ void inicializarBancoRegistradores(BancoRegistradores *banco_registradores) {
 
 void inicializarPC(PC *pc) {
     pc->endereco_atual = 0;
-    pc->endereco_proximo = 0;
+    pc->endereco_proximo = 1;
 }
 
 void inicializarMemoriaDados() {
