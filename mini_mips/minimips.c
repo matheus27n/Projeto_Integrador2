@@ -141,69 +141,75 @@ void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm, Ins
 }
 
 // Implemente as funções para executar o programa e as instruções
-void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc){
-	int referencia = pc->endereco_atual; // Salva uma referencia caso algum procedimento não ocorra corretamente
-	int endereco;
-	switch(inst.tipo){
-		case R_TYPE:
-			// Execução das instruções do tipo R
-			switch (inst.funct) {
-				case 0:  // add
-					banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] + banco_registradores->registradores[inst.rt];
-					break;
-				case 2: // sub 
-					banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] - banco_registradores->registradores[inst.rt];
-					break;
-				case 4: // and
-					banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] & banco_registradores->registradores[inst.rt];
-					break;
-				case 5: // or
-					banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] | banco_registradores->registradores[inst.rt];
-					break;
-				default:
-					printf("Funcao R nao reconhecida: %d\n", inst.funct);
-					break;
-				}
-		 case I_TYPE:
-			// Execução das instruções do tipo I
-			switch (inst.opcode) {
-				case 4: // addi
-					banco_registradores->registradores[inst.rt] = banco_registradores->registradores[inst.rs] + inst.imm;
-					memoria_dados[inst.rt] = banco_registradores->registradores[inst.rt];// Atualizar a memória de dados
-					break;
-				case 11: //Load word
-				    endereco = banco_registradores->registradores[inst.rs] + inst.imm; // Endereço é a soma do registrador rs com o imediato
-					banco_registradores->registradores[inst.rt] = memoria_dados[endereco]; // Carrega o dado para o registrador rt
-				    break;
-				case 15: //Store word
-				    endereco = banco_registradores->registradores[inst.rs] + inst.imm; // Endereço é a soma do registrador rs com o imediato
-					memoria_dados[endereco] = banco_registradores->registradores[inst.rt]; // Armazena o dado do registrador rt na memória de dados
-				    break;
-				case 8: // Brench on equal
-				    if (banco_registradores->registradores[inst.rt] == banco_registradores->registradores[inst.rs]) {
-						pc->endereco_atual = inst.imm; // Atualiza o PC para o endereço especificado pelo imediato
-					}
-					else{
-						pc->endereco_atual = referencia;
-					}
-				    break;	
-				}
-		case J_TYPE:
-			pc->endereco_atual = inst.addr; // Atualiza o PC para o endereço especificado na instrução
-			if (pc->endereco_atual >= 0 && pc->endereco_atual < TAM_MEMORIA){ // Verifica se o endereço é válido
-				printf("Desvio para o endereco: %d\n", pc->endereco_atual);
-				pc->endereco_proximo = pc->endereco_atual; // Avança para a próxima instrução na sequência
-			}
-			else{
-				pc->endereco_atual = referencia; // Define o próximo endereço como inválido e retorna
-			}
-			break;
-	}
-	pc->endereco_atual = pc->endereco_proximo; // Atualizar o endereço atual
-	pc->endereco_proximo++; // Avançar para a próxima instrução na sequência
-	printf("\nPC atual: %d\n", pc->endereco_atual);
-	printf("PC proximo: %d\n", pc->endereco_proximo);
+void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc) {
+    int referencia = pc->endereco_atual; // Salva uma referencia caso algum procedimento não ocorra corretamente
+    int endereco;
+    switch(inst.tipo) {
+        case R_TYPE:
+            // Execução das instruções do tipo R
+            switch (inst.funct) {
+                case 0:  // add
+                    banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] + banco_registradores->registradores[inst.rt];
+                    break;
+                case 2: // sub 
+                    banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] - banco_registradores->registradores[inst.rt];
+                    break;
+                case 4: // and
+                    banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] & banco_registradores->registradores[inst.rt];
+                    break;
+                case 5: // or
+                    banco_registradores->registradores[inst.rd] = banco_registradores->registradores[inst.rs] | banco_registradores->registradores[inst.rt];
+                    break;
+                default:
+                    printf("Funcao R nao reconhecida: %d\n", inst.funct);
+                    break;
+            }
+            break;
+        case I_TYPE:
+            // Execução das instruções do tipo I
+            switch (inst.opcode) {
+                case 4: // addi
+                    banco_registradores->registradores[inst.rt] = banco_registradores->registradores[inst.rs] + inst.imm;
+                    //memoria_dados[inst.rt] = banco_registradores->registradores[inst.rt]; // Atualizar a memória de dados
+                    break;
+                case 11: //Load word
+                    endereco = banco_registradores->registradores[inst.rs] + inst.imm; // Endereço é a soma do registrador rs com o imediato
+                    banco_registradores->registradores[inst.rt] = memoria_dados[endereco]; // Carrega o dado para o registrador rt
+                    break;
+                case 15: //Store word
+                    endereco = banco_registradores->registradores[inst.rs] + inst.imm; // Endereço é a soma do registrador rs com o imediato
+                    memoria_dados[endereco] = banco_registradores->registradores[inst.rt]; // Armazena o dado do registrador rt na memória de dados
+                    //zerar o registrador após transferir os dados para a memoria de dados
+                    banco_registradores->registradores[inst.rt] = 0;
+                    break;
+                case 8: // Brench on equal
+                    if (banco_registradores->registradores[inst.rt] == banco_registradores->registradores[inst.rs]) {
+                        pc->endereco_atual = inst.imm; // Atualiza o PC para o endereço especificado pelo imediato
+                    } else {
+                        pc->endereco_atual = referencia;
+                    }
+                    break;
+            }
+            break;
+        case J_TYPE:
+            pc->endereco_atual = inst.addr; // Atualiza o PC para o endereço especificado na instrução
+            if (pc->endereco_atual >= 0 && pc->endereco_atual < TAM_MEMORIA) { // Verifica se o endereço é válido
+                printf("Desvio para o endereco: %d\n", pc->endereco_atual);
+                pc->endereco_proximo = pc->endereco_atual; // Avança para a próxima instrução na sequência
+            } else {
+                pc->endereco_atual = referencia; // Define o próximo endereço como inválido e retorna
+            }
+            break;
+    }
+    pc->endereco_atual = pc->endereco_proximo; // Atualizar o endereço atual
+    pc->endereco_proximo++; // Avançar para a próxima instrução na sequência
+    printf("\nPC atual: %d\n", pc->endereco_atual);
+    printf("PC proximo: %d\n", pc->endereco_proximo);
+
+    // Criar o backup após a execução da instrução e armazenar o ponteiro para ele
+
 }
+
 
 
 // FUNÇÕES DE INICIAÇÃO E ENTRADA
@@ -348,3 +354,4 @@ void imprimirRegistradores(BancoRegistradores *banco_registradores) {
 
 
 
+//BACK

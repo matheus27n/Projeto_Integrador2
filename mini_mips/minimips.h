@@ -36,6 +36,10 @@ typedef struct { // Estrutura para representar o contador de programa (PC)
     int endereco_proximo; // Endereço da próxima instrução a ser executada
 } PC;
 
+// Struct para representar o back
+
+
+
 // Protótipos das funções
 int menu();
 void inicializarBancoRegistradores(BancoRegistradores *banco_registradores);
@@ -48,8 +52,12 @@ void imprimirInstrucao(Instrucao inst);
 void imprimirMemoriaDados();
 int ula(int a, int b, int op);
 int mux(int a, int b, int select);
-void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc); // Protótipo adicionado
+void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, PC *pc);
 void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm, Instrucao inst);
 void salvar_data();
 void salvar_asm();
 Instrucao codificarInstrucao(char *instrucao_string); // Protótipo adicionado
+
+
+
+

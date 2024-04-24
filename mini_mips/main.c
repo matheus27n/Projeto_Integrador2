@@ -4,6 +4,7 @@
 
 int main(){
 	BancoRegistradores banco_registradores;
+   // Backup *backup = NULL; // Inicialize o ponteiro de backup como NULL
     PC pc;
     inicializarBancoRegistradores(&banco_registradores);
     inicializarPC(&pc);
@@ -42,7 +43,7 @@ int main(){
                 break;
             case 7:
                 while (pc.endereco_atual < TAM_MEMORIA) {
-                    executarInstrucao(codificarInstrucao(memoria_instrucao[pc.endereco_atual]), &banco_registradores, &pc);
+                executarInstrucao(codificarInstrucao(memoria_instrucao[pc.endereco_atual]), &banco_registradores, &pc);
                     printf("\n");
                 }
                 imprimirRegistradores(&banco_registradores);
