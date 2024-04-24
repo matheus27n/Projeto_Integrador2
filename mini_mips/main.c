@@ -7,8 +7,8 @@ int main(){
     PC pc;
     inicializarBancoRegistradores(&banco_registradores);
     inicializarPC(&pc);
-    carregarMemoria(); 
     inicializarMemoriaDados();
+
 	int opcao = 1;
 	while(opcao != 0){
 		opcao = menu();

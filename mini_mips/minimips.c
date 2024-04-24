@@ -227,7 +227,11 @@ void inicializarMemoriaDados() {
 }
 
 void carregarMemoria() {
-    FILE *arquivo_memoria = fopen("programaTestaInstrucoes.mem", "r"); //r = read / ponteiro para ler o arquivo
+    char nome_arquivo[50];
+    printf("Digite o nome do arquivo .mem que deseja abrir: ");
+    scanf("%s", nome_arquivo);
+
+    FILE *arquivo_memoria = fopen(nome_arquivo, "r"); // Abre o arquivo especificado pelo usuário
     if (arquivo_memoria == NULL) {
         printf("Erro ao abrir o arquivo\n");
         return;
@@ -245,6 +249,7 @@ void carregarMemoria() {
     fclose(arquivo_memoria);
     printf("Memoria carregada com sucesso\n");
 }
+
 
 // FUNÇÕES DE SALVAMENTO
 
@@ -281,6 +286,7 @@ void salvar_data() {
     printf("Arquivo .mem salvo com sucesso!\n");
 }
 
+// FUNÇÃO DE BACK (VOLTAR 1 INSTRUÇÃO)
 
 
 //FUNÇÕES DE IMPRESSÃO
