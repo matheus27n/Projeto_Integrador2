@@ -17,7 +17,7 @@ int menu(){
     printf("3. Imprimir registradores \n"); 
     printf("4. Imprimir todo o simulador \n"); 
     printf("5. Salvar .asm \n"); 
-    printf("6. Salvar . \n"); 
+    printf("6. Salvar .data \n"); 
     printf("7. Executa Programa (run)\n"); 
     printf("8. Executa uma instrucao (Step)\n"); 
     printf("9. Volta uma instrucao (Back)\n"); 
