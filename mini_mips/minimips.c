@@ -17,7 +17,7 @@ int menu(){
     printf("3. Imprimir registradores \n"); 
     printf("4. Imprimir todo o simulador \n"); 
     printf("5. Salvar .asm \n"); 
-    printf("6. Salvar .mem \n"); 
+    printf("6. Salvar . \n"); 
     printf("7. Executa Programa (run)\n"); 
     printf("8. Executa uma instrucao (Step)\n"); 
     printf("9. Volta uma instrucao (Back)\n"); 
@@ -170,7 +170,7 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
             switch (inst.opcode) {
                 case 4: // addi
                     banco_registradores->registradores[inst.rt] = banco_registradores->registradores[inst.rs] + inst.imm;
-                    //memoria_dados[inst.rt] = banco_registradores->registradores[inst.rt]; // Atualizar a memória de dados
+                    memoria_dados[inst.rt] = banco_registradores->registradores[inst.rt]; // Atualizar a memória de dados
                     break;
                 case 11: //Load word
                     endereco = banco_registradores->registradores[inst.rs] + inst.imm; // Endereço é a soma do registrador rs com o imediato
@@ -350,8 +350,11 @@ void imprimirRegistradores(BancoRegistradores *banco_registradores) {
 
 
 
-
-
-
-
 //BACK
+void voltarInstrucao(PC *pc){
+    pc->endereco_atual--;
+    pc->endereco_proximo--;
+    printf("Voltando para a instrucao anterior\n");
+    printf("PC atual: %d\n", pc->endereco_atual);
+    printf("PC proximo: %d\n", pc->endereco_proximo);
+}
