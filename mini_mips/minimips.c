@@ -267,49 +267,47 @@ void salvar_asm() {
 }
 
 // Salvar configuração de memória em .mem 
-void salvar_mem() {
-    FILE *arquivo_mem = fopen("memoria.mem", "w"); //w = write / ponteiro para escrever no arquivo
-    if (arquivo_mem == NULL) {
+void salvar_data() {
+    FILE *arquivo_memoria = fopen("programa.mem", "w"); //w = write / ponteiro para escrever no arquivo
+    if (arquivo_memoria == NULL) {
         printf("Erro ao criar o arquivo\n");
         return;
     }
-    // Escrever o estado atual da memória no arquivo .mem
-    for (int i = 0; i < TAM_MEMORIA; i++) {
-        for (int j = 0; j < TAM_INSTRUCAO; j++) {
-            fprintf(arquivo_mem, "%c ", memoria_instrucao[i][j]);
-        }
-        fprintf(arquivo_mem, "\n");
+    // Iterar sobre cada endereço na memória de dados e salvar o conteúdo
+    for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
+        fprintf(arquivo_memoria, "Endereço de memoria[%d]:%d\n", i, memoria_dados[i]);
     }
-
-    fclose(arquivo_mem);
+    fclose(arquivo_memoria);
     printf("Arquivo .mem salvo com sucesso!\n");
 }
 
 
 
 //FUNÇÕES DE IMPRESSÃO
-
 void imprimirInstrucao(Instrucao inst) {
     switch (inst.tipo) {
         case R_TYPE:
-            printf("Tipo: R_TYPE\t");
-            printf("Opcode: %d\t", inst.opcode);
-            printf("Rs (Origem): %d\t", inst.rs);
-            printf("Rt (Alvo): %d\t", inst.rt);
-            printf("Rd (Destino): %d\t", inst.rd);
-            printf("Funct (Funcao(AND/SUB)): %d\t", inst.funct);
+            printf("Tipo: [TIPO R]\n");
+            printf("Opcode: [%d]\n", inst.opcode);
+            printf("Rs: [%d]\n", inst.rs);
+            printf("Rt: [%d]\n", inst.rt);
+            printf("Rd: [%d]\n", inst.rd);
+            printf("Funct: [%d]\n", inst.funct);
+            printf("--------------------\n");
             break;
         case I_TYPE:
-            printf("Tipo: I_TYPE\t");
-            printf("Opcode: %d\t", inst.opcode);
-            printf("Rs (Origem): %d\t", inst.rs);
-            printf("Rt (Alvo): %d\t", inst.rt);
-            printf("Imediato: %d\t", inst.imm);
+            printf("Tipo: [TIPO I]\n");
+            printf("Opcode: [%d]\n", inst.opcode);
+            printf("Rs: [%d]\n", inst.rs);
+            printf("Rt: [%d]\n", inst.rt);
+            printf("Imediato: [%d]\n", inst.imm);
+            printf("--------------------\n");
             break;
         case J_TYPE:
-            printf("Tipo: J_TYPE\t");
-            printf("Opcode: %d\t", inst.opcode);
-            printf("Addr: %d\t", inst.addr);
+            printf("Tipo: [TIPO J]\n");
+            printf("Opcode: [%d]\nt", inst.opcode);
+            printf("Addr: [%d]\n", inst.addr);
+            printf("--------------------\n");
             break;
     }
 }

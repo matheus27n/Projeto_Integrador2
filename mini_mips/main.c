@@ -38,7 +38,7 @@ int main(){
                 salvar_asm();
                 break;
             case 6:
-                salvar_mem();
+                salvar_data();
                 break;
             case 7:
                 while (pc.endereco_atual < TAM_MEMORIA) {
