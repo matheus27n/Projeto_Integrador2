@@ -37,7 +37,11 @@ typedef struct { // Estrutura para representar o contador de programa (PC)
 } PC;
 
 // Struct para representar o back
-
+typedef struct{
+    BancoRegistradores banco_registradores_backup;
+    PC pc_backup;
+    Instrucao inst_backup;
+}Backup;
 
 
 // Protótipos das funções
@@ -46,6 +50,7 @@ void inicializarBancoRegistradores(BancoRegistradores *banco_registradores);
 void inicializarPC(PC *pc);
 void inicializarMemoriaDados(); // Adicionado protótipo
 void carregarMemoria();
+void carregarMemoriaDados();
 void imprimirMemoria(char memoria_instrucao[][TAM_INSTRUCAO]);
 void imprimirRegistradores(BancoRegistradores *banco_registradores);
 void imprimirInstrucao(Instrucao inst);
@@ -58,6 +63,6 @@ void salvar_data();
 void salvar_asm();
 Instrucao codificarInstrucao(char *instrucao_string); // Protótipo adicionado
 
-
-
-
+//back
+Backup back(BancoRegistradores *banco_registradores, PC *pc, Instrucao *inst);
+void voltarSimulador(BancoRegistradores *banco_registradores, PC *pc, Instrucao *inst, Backup *backup);

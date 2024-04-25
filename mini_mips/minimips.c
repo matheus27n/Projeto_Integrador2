@@ -21,6 +21,7 @@ int menu(){
     printf("7. Executa Programa (run)\n"); 
     printf("8. Executa uma instrucao (Step)\n"); 
     printf("9. Volta uma instrucao (Back)\n"); 
+    printf("10.Carregar memoria de dados\n");
     printf("0. Sair \n"); 
     printf("\n================================\n");
     printf("Escolha uma opcao: "); 
@@ -91,7 +92,7 @@ Instrucao codificarInstrucao(char *instrucao_string){
     return inst;
 }
 
-// Conversor de instrução binária em assembly
+
 // Conversor de instrução binária em assembly
 void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm, Instrucao inst) {
     switch (inst.tipo) {
@@ -207,6 +208,7 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
     printf("PC proximo: %d\n", pc->endereco_proximo);
 
     // Criar o backup após a execução da instrução e armazenar o ponteiro para ele
+    Backup backup = back(banco_registradores, pc, &inst);
 
 }
 
@@ -230,6 +232,28 @@ void inicializarMemoriaDados() {
     for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
         memoria_dados[i] = 0;
     }
+}
+// FUNÇÕES DE CARREGAR MEMORIA DE INSTRUÇÕES E DADOS
+void carregarMemoriaDados() {
+    char nome_arquivo[50];
+    printf("Digite o nome do arquivo .data que deseja abrir: ");
+    scanf("%s", nome_arquivo);
+
+    FILE *arquivo_memoria = fopen(nome_arquivo, "r"); // Abre o arquivo especificado pelo usuário
+    if (arquivo_memoria == NULL) {
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+
+    int endereco, valor;
+    // Lê cada par de valores endereço e valor do arquivo e carrega na memória de dados
+    for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
+        fscanf(arquivo_memoria, "Endereço de memoria[%d]:%d\n", &endereco, &valor);
+        memoria_dados[endereco] = valor;
+    }
+
+    fclose(arquivo_memoria);
+    printf("Memória de dados carregada com sucesso\n");
 }
 
 void carregarMemoria() {
@@ -258,8 +282,6 @@ void carregarMemoria() {
 
 
 // FUNÇÕES DE SALVAMENTO
-
-// Salvar instruções em .asm
 void salvar_asm() {
     FILE *arquivo_asm = fopen("programa.asm", "w"); //w = write / ponteiro para escrever no arquivo
     if (arquivo_asm == NULL) {
@@ -279,7 +301,7 @@ void salvar_asm() {
 
 // Salvar configuração de memória em .mem 
 void salvar_data() {
-    FILE *arquivo_memoria = fopen("programa.mem", "w"); //w = write / ponteiro para escrever no arquivo
+    FILE *arquivo_memoria = fopen("programa.data", "w"); //w = write / ponteiro para escrever no arquivo
     if (arquivo_memoria == NULL) {
         printf("Erro ao criar o arquivo\n");
         return;
@@ -351,10 +373,38 @@ void imprimirRegistradores(BancoRegistradores *banco_registradores) {
 
 
 //BACK
-void voltarInstrucao(PC *pc){
-    pc->endereco_atual--;
-    pc->endereco_proximo--;
-    printf("Voltando para a instrucao anterior\n");
+Backup back(BancoRegistradores *banco_registradores, PC *pc, Instrucao *inst){
+    Backup backup;
+    backup.banco_registradores_backup = *banco_registradores;
+    backup.pc_backup = *pc;
+    backup.inst_backup = *inst;
+    printf("Backup realizado com sucesso\n");
+    //printar o backup na tela
+    printf("Banco de registradores: \n");
+    for (int i = 0; i < TAM_REGISTRADORES; i++) {
+        printf("R%d: %d\n", i, backup.banco_registradores_backup.registradores[i]);
+    }
+    printf("PC atual: %d\n", backup.pc_backup.endereco_atual);
+    printf("PC proximo: %d\n", backup.pc_backup.endereco_proximo);
+    imprimirInstrucao(backup.inst_backup);
+    return backup;
+}
+
+//FUNÇÃO DE VOLTA UMA INSTRUÇÃO
+void voltarSimulador(BancoRegistradores *banco_registradores, PC *pc, Instrucao *inst, Backup *backup){
+    *banco_registradores = backup->banco_registradores_backup;
+    *pc = backup->pc_backup;
+    *inst = backup->inst_backup;
+    printf("Simulador voltado com sucesso\n");
+
+    printf("Banco de registradores: \n");
+    for (int i = 0; i < TAM_REGISTRADORES; i++) {
+        printf("R%d: %d\n", i, banco_registradores->registradores[i]);
+    }
     printf("PC atual: %d\n", pc->endereco_atual);
     printf("PC proximo: %d\n", pc->endereco_proximo);
+    imprimirInstrucao(*inst);
+    
 }
+
+

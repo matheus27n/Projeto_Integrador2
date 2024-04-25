@@ -4,8 +4,9 @@
 
 int main(){
 	BancoRegistradores banco_registradores;
-   // Backup *backup = NULL; // Inicialize o ponteiro de backup como NULL
     PC pc;
+    Backup backup;
+    Instrucao inst;
     inicializarBancoRegistradores(&banco_registradores);
     inicializarPC(&pc);
     inicializarMemoriaDados();
@@ -54,7 +55,11 @@ int main(){
                 executarInstrucao(codificarInstrucao(memoria_instrucao[pc.endereco_atual]), &banco_registradores, &pc);
                 break;
             case 9:
-				break;
+                voltarSimulador(&banco_registradores, &pc, &inst, &backup);
+                break;
+            case 10:
+                carregarMemoriaDados();
+                break;
             case 0:
 				printf("\nFinalizando o programa...\n\n");
 				break;
