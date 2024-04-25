@@ -10,7 +10,7 @@ int memoria_dados[TAM_MEMORIA_DADOS]; // Definição das variáveis
 int menu(){
     int m;
     printf("\n================================\n");
-    printf("\tMENU PRINCIPAL"); 
+    printf("\t MINI-MIPS 8 BITS - UNIPAMPA\n"); 
     printf("\n================================\n\n");
     printf("1. Carregar memoria\n"); 
     printf("2. Imprimir memoria \n"); 
@@ -185,7 +185,7 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
                     break;
                 case 8: // Brench on equal
                     if (banco_registradores->registradores[inst.rt] == banco_registradores->registradores[inst.rs]) {
-                        pc->endereco_atual = inst.imm; // Atualiza o PC para o endereço especificado pelo imediato
+                        pc->endereco_atual + inst.imm; // Atualiza o PC para o endereço especificado pelo imediato
                     } else {
                         pc->endereco_atual = referencia;
                     }
