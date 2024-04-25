@@ -5,8 +5,9 @@
 int main(){
 	BancoRegistradores banco_registradores;
     PC pc;
-    Backup backup;
-    Instrucao inst;
+    //Backup backup;
+    struct nodo* backup = NULL;
+    //Instrucao inst;
     inicializarBancoRegistradores(&banco_registradores);
     inicializarPC(&pc);
     inicializarMemoriaDados();
@@ -52,10 +53,12 @@ int main(){
                 printf("\nPrograma executado com sucesso\n");
                 break;
             case 8: 
+            //salvar o programa antes de voltar
+				backup = save_backup(&pc,memoria_dados,&banco_registradores);
                 executarInstrucao(codificarInstrucao(memoria_instrucao[pc.endereco_atual]), &banco_registradores, &pc);
                 break;
             case 9:
-                voltarSimulador(&banco_registradores, &pc, &inst, &backup);
+                undo(backup,&pc,memoria_dados,&banco_registradores);
                 break;
             case 10:
                 carregarMemoriaDados();

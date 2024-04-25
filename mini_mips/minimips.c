@@ -373,38 +373,39 @@ void imprimirRegistradores(BancoRegistradores *banco_registradores) {
 
 
 //BACK
-Backup back(BancoRegistradores *banco_registradores, PC *pc, Instrucao *inst){
-    Backup backup;
-    backup.banco_registradores_backup = *banco_registradores;
-    backup.pc_backup = *pc;
-    backup.inst_backup = *inst;
-    printf("Backup realizado com sucesso\n");
-    //printar o backup na tela
-    printf("Banco de registradores: \n");
-    for (int i = 0; i < TAM_REGISTRADORES; i++) {
-        printf("R%d: %d\n", i, backup.banco_registradores_backup.registradores[i]);
+struct nodo* save_backup(PC*pc, int memoria_dados[], BancoRegistradores *banco_registradores){
+    if (pc == NULL || memoria_dados == NULL || banco_registradores == NULL) {
+        printf("Aviso: Ponteiros invalidos ou contendo dados invalidos\n");
+        printf("Erro: nao foi possivel salvar backup\n");
+        return NULL;
     }
-    printf("PC atual: %d\n", backup.pc_backup.endereco_atual);
-    printf("PC proximo: %d\n", backup.pc_backup.endereco_proximo);
-    imprimirInstrucao(backup.inst_backup);
-    return backup;
+    struct nodo *novoNodo = (struct nodo*)malloc(sizeof(struct nodo));
+    if (novoNodo == NULL) {
+        printf("Erro ao alocar memória para o backup\n");
+        return NULL; 
+    }
+    for (int i = 0; i < TAM_REGISTRADORES; i++) {
+        novoNodo->banco_undo.registradores[i] = banco_registradores->registradores[i];
+    }
+    novoNodo->pc_undo.endereco_atual = pc->endereco_atual-1;
+    novoNodo->pc_undo.endereco_proximo = pc->endereco_proximo-1;
+    return novoNodo;
 }
 
-//FUNÇÃO DE VOLTA UMA INSTRUÇÃO
-void voltarSimulador(BancoRegistradores *banco_registradores, PC *pc, Instrucao *inst, Backup *backup){
-    *banco_registradores = backup->banco_registradores_backup;
-    *pc = backup->pc_backup;
-    *inst = backup->inst_backup;
-    printf("Simulador voltado com sucesso\n");
-
-    printf("Banco de registradores: \n");
-    for (int i = 0; i < TAM_REGISTRADORES; i++) {
-        printf("R%d: %d\n", i, banco_registradores->registradores[i]);
+void undo(struct nodo *backup, PC *pc, int *memoria_dados, BancoRegistradores *banco_registradores){
+    if (backup == NULL) {
+        printf("Erro: Backup invalido\n");
+        return;
     }
-    printf("PC atual: %d\n", pc->endereco_atual);
-    printf("PC proximo: %d\n", pc->endereco_proximo);
-    imprimirInstrucao(*inst);
-    
+    for (int i = 0; i < TAM_REGISTRADORES; i++) {
+        banco_registradores->registradores[i] = backup->banco_undo.registradores[i];
+    }
+    pc->endereco_atual = backup->pc_undo.endereco_atual;
+    pc->endereco_proximo = backup->pc_undo.endereco_proximo;
+    for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
+        memoria_dados[i] = backup->mem_dados_undo[i];
+    }
+    printf("Estado restaurado para o backup.\n");
 }
 
 
