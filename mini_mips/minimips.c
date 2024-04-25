@@ -208,7 +208,7 @@ void executarInstrucao(Instrucao inst, BancoRegistradores *banco_registradores, 
     printf("PC proximo: %d\n", pc->endereco_proximo);
 
     // Criar o backup após a execução da instrução e armazenar o ponteiro para ele
-    Backup backup = back(banco_registradores, pc, &inst);
+    //Backup backup = back(banco_registradores, pc, &inst);
 
 }
 
