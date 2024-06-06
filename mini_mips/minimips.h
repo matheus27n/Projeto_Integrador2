@@ -36,13 +36,6 @@ typedef struct { // Estrutura para representar o contador de programa (PC)
     int endereco_proximo; // Endereço da próxima instrução a ser executada
 } PC;
 
-// Struct para representar o back
-/*typedef struct{
-    BancoRegistradores banco_registradores_backup;
-    PC pc_backup;
-    Instrucao inst_backup;
-}Backup;*/
-
 struct nodo{
 	BancoRegistradores banco_undo;
 	PC pc_undo;
@@ -67,10 +60,7 @@ void converter_asm(char instrucao_binaria[TAM_INSTRUCAO], FILE *arquivo_asm, Ins
 void salvar_data();
 void salvar_asm();
 Instrucao codificarInstrucao(char *instrucao_string); // Protótipo adicionado
-
-//back
-/*Backup back(BancoRegistradores *banco_registradores, PC *pc, Instrucao *inst);
-void voltarSimulador(BancoRegistradores *banco_registradores, PC *pc, Instrucao *inst, Backup *backup);*/
-
+int check_overflow(int result);
+int sign_extend(int value, int original_bits);
 void undo(struct nodo *backup, PC *pc, int *memoria_dados, BancoRegistradores *banco_registradores);
 struct nodo* save_backup(PC*pc, int memoria_dados[], BancoRegistradores *banco_registradores);
