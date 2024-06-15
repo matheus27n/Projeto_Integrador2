@@ -15,31 +15,6 @@ typedef enum { // Enumeração para os tipos de instrução
     J_TYPE
 } InstrucaoTipo;
 
-typedef enum { // Enumeração para os estados do ciclo de execução
-    FETCH,
-    DECODE,
-    EXECUTE,
-    MEMORY,
-    WRITEBACK
-} EstadoCiclo;
-
-typedef struct controle { // Estrutura para o controle
-    int EscrevePcCond;
-    int EscrevePc;
-    int IouD;
-    int LeMem;
-    int EscreveMem;
-    int MemParaReg;
-    int EscreveIR;
-    int OrigPC;
-    int OpAlu;
-    int OrigA;
-    int OrigB;
-    int EscreveReg;
-    int RegDst;
-    int AluSrc;
-} Controle;
-
 typedef struct { // Estrutura para representar uma instrução MIPS
     InstrucaoTipo tipo;
     char inst_char[TAM_INSTRUCAO]; // 16 caracteres + 1 para o caractere nulo
@@ -54,14 +29,18 @@ typedef struct { // Estrutura para representar uma instrução MIPS
 
 typedef struct { // Estrutura para representar o banco de registradores
     int registradores[TAM_REGISTRADORES];
+} BancoRegistradores;
+
+typedef struct {
     int registradorA;
     int registradorB;
-} BancoRegistradores;
+    int registradorSaidaALU;
+}RegistradoresEstado;
 
 typedef struct { // Estrutura para representar o contador de programa (PC)
     int endereco_atual; // Endereço da instrução atual
     int endereco_proximo; // Endereço da próxima instrução a ser executada
-    EstadoCiclo estadoCiclo; // Estado atual do ciclo de execução
+    //EstadoCiclo estadoCiclo; // Estado atual do ciclo de execução
 } PC;
 
 typedef struct { // Estrutura para representar a memória única
@@ -96,12 +75,6 @@ void undo(struct nodo *backup, PC *pc, int *memoria_dados, BancoRegistradores *b
 struct nodo* save_backup(PC*pc, int memoria_dados[], BancoRegistradores *banco_registradores);
 
 // Novos protótipos de funções multiciclo
-void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Controle *unidadeControle, Instrucao inst, EstadoCiclo estado_ciclo);
-void carregarMemoriaUnica(Controle *unidadeControle);
+void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores);
+void carregarMemoriaUnica();
 void imprimirMemoriaUnica();
-void fetch(PC *pc, MemoriaUnica *memoria, Controle *controle);
-void decode(Instrucao *inst, BancoRegistradores *banco_registradores, Controle *controle);
-void execute(Instrucao *inst, BancoRegistradores *banco_registradores, Controle *controle);
-void memory(Instrucao *inst, MemoriaUnica *memoria, Controle *controle);
-void writeback(Instrucao *inst, BancoRegistradores *banco_registradores, Controle *controle);
-void setControleSignal(EstadoCiclo *estadoCiclo, Instrucao *inst, Controle *unidadeControle);

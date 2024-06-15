@@ -4,9 +4,7 @@
 
 int main(){
     BancoRegistradores banco_registradores;
-    Controle unidadeControle;
     Instrucao instrucao;
-    EstadoCiclo estado_ciclo;
     PC pc;
     struct nodo* backup = NULL; //Backup backup;
     inicializarBancoRegistradores(&banco_registradores);
@@ -17,7 +15,7 @@ int main(){
 		opcao = menu();
 		switch(opcao){
 			case 1:
-                carregarMemoriaUnica(&unidadeControle);
+                carregarMemoriaUnica();
                 break;
             case 2:
                 imprimirMemoriaUnica();
@@ -47,7 +45,7 @@ int main(){
                 printf("programa finalizado\n");
                 break;
             case 9:
-                executarCicloInstrucao(&pc, &banco_registradores, &unidadeControle, instrucao, estado_ciclo);
+                executarCicloInstrucao(&pc, &banco_registradores);
 
                 //backup = save_backup(&pc,memoria_dados,&banco_registradores);
                 break;

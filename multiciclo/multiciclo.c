@@ -18,7 +18,7 @@ int menu(){
     printf("2. Imprimir memoriaUnica \n");
     printf("3. Imprimir registradores \n"); 
     printf("4. Imprimir todo o simulador \n"); 
-    printf("5. Decodificação de Instruções \n");
+    printf("5. Decodificar instrucao atual \n");
     printf("6. Salvar .asm \n"); 
     printf("7. Salvar .data \n"); 
     printf("8. Executa Programa (run)\n"); 
@@ -161,138 +161,76 @@ int sign_extend(int value, int original_bits) {
 
 // Implemente as funções para executar o programa e as instruções
 //executar programa com todos os ciclos necessarios FETCH, DECODE, EXECUTE, MEMORY, WRITEBACK
-void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Controle *unidadeControle, Instrucao inst, EstadoCiclo estado_ciclo) {
-    int referencia = pc->endereco_atual; // Salva o endereço atual para referência
-    int endereco;
-    int rd_teste;
-    int rs_teste;
-    int rt_teste;
-    int resultado;
+void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores) {
+    static int estado = 0; // Para acompanhar o ciclo atual
+    static Instrucao instrucao; // Armazenar a instrução entre os ciclos
+    int rs_teste, rt_teste, resultado;
 
-    switch (estado_ciclo) {
-        case FETCH:
-            // Busca a instrução na memória de instruções
-            strcpy(memoria_instrucao[pc->endereco_atual], memoria_instrucao[pc->endereco_atual]);
+    switch (estado) {
+
+        case 0: // FETCH
+            printf("--------Executando ciclo FETCH-----------\n");
+            printf("Instrução buscada: %s\n", memoria_instrucao[pc->endereco_atual]);
+            instrucao = codificarInstrucao(memoria_instrucao[pc->endereco_atual]);
+            estado = 1;
+            break;
+
+
+        case 1: // DECODE
+            printf("--------Executando ciclo DECODE-----------\n");
+            // Decodificação da instrução
+            if(instrucao.tipo == R_TYPE){
+                estado = 7;
+            } else {
+                estado = 2;
+            }
+            break;
+
+
+        case 2: // EXECUTE
+            printf("--------Executando ciclo EXECUTE-----------\n");
+            // Executar a instrução decodificada
+            estado = 3;
+            break;
+
+
+        case 3: // MEMORY
+            printf("--------Executando ciclo MEMORY-----------\n");
+            // Operações de memória se necessário
+            estado = 4;
+            break;
+
+
+        case 4: // WRITEBACK
+            printf("--------Executando ciclo WRITEBACK-----------\n");
+            // Escrever resultados de volta aos registradores/memória
             pc->endereco_atual = pc->endereco_proximo;
             pc->endereco_proximo++;
-            printf("A instrucao %s foi buscada na memoria de instrucoes\n", memoria_instrucao[referencia]);
-            printf("fetch\n");
-            break;
-        case DECODE:
-            // Decodifica a instrução
-            inst = codificarInstrucao(memoria_instrucao[referencia]);
-            printf("decode\n");
-            break;
-        case EXECUTE:
-            // Executa a instrução
-            switch (inst.tipo) {
-                case R_TYPE:
-                    // Verifica se os registradores existem
-                    rd_teste = banco_registradores->registradores[inst.rd];
-                    rs_teste = banco_registradores->registradores[inst.rs];
-                    rt_teste = banco_registradores->registradores[inst.rt];
-                    if (rd_teste == 0 && rs_teste == 0 && rt_teste == 0) {
-                        break;
-                    }
-                    // Executa a instrução
-                    resultado = ula(banco_registradores->registradores[inst.rs], banco_registradores->registradores[inst.rt], inst.funct);
-                    // Verifica se houve overflow
-                    if (check_overflow(resultado)) {
-                        printf("Erro: Overflow detectado\n");
-                        break;
-                    }
-                    // Atualiza o registrador de destino
-                    banco_registradores->registradores[inst.rd] = resultado;
-                    break;
-                case I_TYPE:
-                    switch (inst.opcode) {
-                        case 4: // addi
-                            // Verifica se os registradores existem
-                            rd_teste = banco_registradores->registradores[inst.rt];
-                            rs_teste = banco_registradores->registradores[inst.rs];
-                            if (rd_teste == 0 && rs_teste == 0) {
-                                break;
-                            }
-                            // Executa a instrução
-                            resultado = ula(banco_registradores->registradores[inst.rs], inst.imm, 0);
-                            // Verifica se houve overflow
-                            if (check_overflow(resultado)) {
-                                printf("Erro: Overflow detectado\n");
-                                break;
-                            }
-                            // Atualiza o registrador de destino
-                            banco_registradores->registradores[inst.rt] = resultado;
-       
-}
-        }
-    }
-}
-
-void setControleSignal(EstadoCiclo *estadoCiclo, Instrucao *inst, Controle *unidadeControle){
-    switch(*estadoCiclo){ // Usando *estadoCiclo para acessar o valor apontado pelo ponteiro
-        case FETCH:
-            unidadeControle->LeMem = 0;
-            unidadeControle->IouD = 0;
-            unidadeControle->EscreveIR = 1;
-            unidadeControle->OrigB = 1;
-            unidadeControle->OrigA = 0;
-            unidadeControle->EscrevePc = 1;
-            unidadeControle->OrigPC = 0;
+            estado = 0;
             break;
 
-        case DECODE:
-            unidadeControle->OrigA = 0;
-            unidadeControle->OrigB = 3;
-            unidadeControle->OpAlu = 0;
-            break;
 
-        case EXECUTE:
-            switch(inst->tipo){
-                case R_TYPE:
-                    unidadeControle->OrigA = 1;
-                    unidadeControle->OrigB = 2;
-                    unidadeControle->OpAlu = inst->funct;
-                    unidadeControle->RegDst = 1;
-                    break;
-                case I_TYPE:
-                    switch (inst->opcode){
-                        case 4: //addi
-                            unidadeControle->OrigA = 1; //rs
-                            unidadeControle->OrigB = 0; //imm
-                            unidadeControle->OpAlu = 0; //add
-                            unidadeControle->RegDst = 0; //rt
-                            unidadeControle->EscreveMem = 1; //write
-                            unidadeControle->EscreveReg = 1; //write
-                            unidadeControle->RegDst = 0; //rt
-                            unidadeControle->MemParaReg = 0; //mem para reg
-                            break;
-                        
-                        case 11: //lw
-                            unidadeControle->OrigA = 1;
-                            unidadeControle->OrigB = 0;
-                            unidadeControle->OpAlu = 0;
-                            unidadeControle->RegDst = 0;
-                            unidadeControle->EscreveMem = 0;
-                            unidadeControle->IouD = 1;
-                            break;
-                        
-                        case 15: //sw
-                            unidadeControle->OrigA = 1;
-                            unidadeControle->OrigB = 0;
-                            unidadeControle->OpAlu = 0;
-                            unidadeControle->RegDst = 0;
-                            break;
-
-                        case 8: //beq
-                            unidadeControle->OrigA = 1;
-                            unidadeControle->OrigB = 0;
-                            unidadeControle->OpAlu = 1;
-                            unidadeControle->RegDst = 0;
-                            break;
-                    }
+        //CASE ESPECIAIS PARA CADA TIPO DE INSTRUÇÃO   
+        case 7: // Estado do tipo R
+            printf("--------Caiu no case 7 TIPO R-----------\n");
+            rs_teste = banco_registradores->registradores[instrucao.rs];
+            rt_teste = banco_registradores->registradores[instrucao.rt];
+            resultado = ula(rs_teste, rt_teste, instrucao.funct);
+            if (check_overflow(resultado)) {
+                printf("Erro: Overflow detectado\n");
+                estado = 0;
+                break;
             }
+            banco_registradores->registradores[instrucao.rd] = resultado;
+            estado = 4; // Próximo estado após executar a instrução tipo R é o WRITEBACK
+            break;
+        default:
+            printf("Estado desconhecido\n");
+            estado = 0;
+            break;
     }
 }
+
 
 
 // FUNÇÕES DE INICIAÇÃO E ENTRADA
@@ -314,7 +252,7 @@ void inicializarMemoriaDados() {
     }
 }
 // FUNÇÕES DE CARREGAR MEMORIA DE INSTRUÇÕES E DADOS
-void carregarMemoriaUnica(Controle *unidadeControle) {
+void carregarMemoriaUnica() {
     char nome_arquivo[50];
     int opcao;
     printf("Escolha entre carregar a memoria de instrucoes (0) ou a memoria de dados (1): ");
