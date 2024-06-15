@@ -180,6 +180,7 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
 
         case 1: // ETAPA DE DECODIFICAÇÃO DA INSTRUCAO E BUSCA DOS REGISTRADORES
             printf("--------Executando ciclo DECODE-----------\n");
+            printf("\n");
             // Decodificação da instrução
             switch (instrucao.tipo) {
                 case R_TYPE:
@@ -190,7 +191,10 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                     printf("Instrução do tipo R identificada\n");
                     registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
                     registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
-                    registradores_estado->registradorSaidaALU = pc->endereco_atual + instrucao.imm;
+                    registradores_estado->registradorSaidaALU = 0; 
+                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
+                    printf("Registrador A: %d\n", registradores_estado->registradorA);
+                    printf("Registrador B: %d\n", registradores_estado->registradorB);
                     estado = 7;
                     break;
                 case I_TYPE:
@@ -200,7 +204,10 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                     imprimirInstrucao(instrucao);
                     registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
                     registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
-                    registradores_estado->registradorSaidaALU = pc->endereco_atual + instrucao.imm;
+                    registradores_estado->registradorSaidaALU = 0;
+                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
+                    printf("Registrador A: %d\n", registradores_estado->registradorA);
+                    printf("Registrador B: %d\n", registradores_estado->registradorB);
                     estado = 2;
                     break;
                 case J_TYPE:
@@ -211,6 +218,9 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                     registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
                     registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
                     registradores_estado->registradorSaidaALU = pc->endereco_atual + instrucao.imm;
+                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
+                    printf("Registrador A: %d\n", registradores_estado->registradorA);
+                    printf("Registrador B: %d\n", registradores_estado->registradorB);
                     estado = 10;
                     break;
                 default:
@@ -225,22 +235,26 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
             switch (instrucao.opcode) {
                 case 4: // ADDI
                     printf("Instrução ADDI\n");
-                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
-                    registradores_estado->registradorB = instrucao.imm;
-                    registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 0);
-                    resultado = registradores_estado->registradorSaidaALU;
+                    registradores_estado->registradorSaidaALU = registradores_estado->registradorA + instrucao.imm;
+                    printf("executando...\n");
                     estado = 6; // Vai para o ciclo de WRITEBACK
                     break;
                 case 11: // LW
-                    printf("Instrução LW\n");
+                    printf("----------Instrução LW--------------\n");
                     registradores_estado->registradorSaidaALU = registradores_estado->registradorA + instrucao.imm;
+                    printf("executando...\n");
+                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
+                    printf("Registrador A: %d\n", registradores_estado->registradorA);
+                    printf("Valor do imediato: %d\n", instrucao.imm);
                     estado = 3;
                     break;
                 case 15: // SW
-                    printf("Instrução SW\n");
-                    registradores_estado->registradorB = instrucao.imm;
-                    registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 0);
-                    resultado = registradores_estado->registradorSaidaALU;
+                    printf("Instrução SW - EXECUTE SW\n");
+                    registradores_estado->registradorSaidaALU = registradores_estado->registradorA + instrucao.imm;
+
+                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
+                    printf("Registrador A: %d\n", registradores_estado->registradorA);
+                    printf("Registrador B: %d\n", registradores_estado->registradorB);
                     estado = 5;
                     break;
                 case 8: // BEQ
@@ -261,31 +275,38 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
             }
             break;
 
-        case 3: // MEMORY
-            printf("--------Executando ciclo MEMORY-----------\n");
+        case 3: // MEMORY LW
+            printf("--------Executando ciclo MEMORY LW-----------\n");
             //lw: RDM = Mem[ALUout]
-            // registradores_estado->registradorSaidaALU = memoria_dados[registradores_estado->registradorSaidaALU];
+            printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
+            printf("Registrar A: %d\n", registradores_estado->registradorA);
+            printf("Registrador B: %d\n", registradores_estado->registradorB);
             estado = 4;
             break;
 
         case 4: // WRITEBACK (LW)
-            printf("--------Executando ciclo WRITEBACK-----------\n");
-            // Escreve o resultado de uma instrução LW no registrador
+            printf("--------Executando ciclo WRITEBACK LW-----------\n");
+            // Escreve o resultado de uma instrução LW no registrado
             banco_registradores->registradores[instrucao.rt] = registradores_estado->registradorSaidaALU;
+            printf("valor adicionado ao registrador: %d\n", banco_registradores->registradores[instrucao.rt]);
+            printf("Escreveu no registrador com sucesso!!\n");
             estado = 0;
             break;
 
         case 5: // WRITEBACK (SW)
-            printf("--------Executando ciclo WRITEBACK-----------\n");
+            printf("--------Executando ciclo WRITEBACK SW-----------\n");
             // Escrever resultados de volta à memória (SW)
-            memoria_dados[registradores_estado->registradorSaidaALU] = resultado;
+            //sw: Mem[ALUout] = B
+            memoria_dados[registradores_estado->registradorSaidaALU] = registradores_estado->registradorB;
             estado = 0;
             break;
 
         case 6: // WRITEBACK (ADDI)
             printf("--------Executando ciclo WRITEBACK-----------\n");
             // Escrever resultados de volta aos registradores (ADDI)
+            //addi: reg[RI] = ULAout
             banco_registradores->registradores[instrucao.rt] = registradores_estado->registradorSaidaALU;
+            printf("Escreveu no registrador com sucesso!!\n");
             estado = 0;
             break;
 
@@ -295,6 +316,7 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                 case 0: // ADD
                     printf("Instrução ADD\n");
                     registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 0);
+                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
                     estado = 8; // Vai para o ciclo de WRITEBACK
                     break;
                 case 2: // SUB
