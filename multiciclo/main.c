@@ -4,6 +4,7 @@
 
 int main(){
     BancoRegistradores banco_registradores;
+    RegistradoresEstado registradores_estado;
     Instrucao instrucao;
     PC pc;
     struct nodo* backup = NULL; //Backup backup;
@@ -45,7 +46,7 @@ int main(){
                 printf("programa finalizado\n");
                 break;
             case 9:
-                executarCicloInstrucao(&pc, &banco_registradores);
+                executarCicloInstrucao(&pc, &banco_registradores, &registradores_estado);
 
                 //backup = save_backup(&pc,memoria_dados,&banco_registradores);
                 break;

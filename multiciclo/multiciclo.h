@@ -75,6 +75,6 @@ void undo(struct nodo *backup, PC *pc, int *memoria_dados, BancoRegistradores *b
 struct nodo* save_backup(PC*pc, int memoria_dados[], BancoRegistradores *banco_registradores);
 
 // Novos protótipos de funções multiciclo
-void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores);
+void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, RegistradoresEstado *registradores_estado);
 void carregarMemoriaUnica();
 void imprimirMemoriaUnica();

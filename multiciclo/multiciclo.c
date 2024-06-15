@@ -161,69 +161,167 @@ int sign_extend(int value, int original_bits) {
 
 // Implemente as funções para executar o programa e as instruções
 //executar programa com todos os ciclos necessarios FETCH, DECODE, EXECUTE, MEMORY, WRITEBACK
-void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores) {
+void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, RegistradoresEstado *registradores_estado) {
     static int estado = 0; // Para acompanhar o ciclo atual
     static Instrucao instrucao; // Armazenar a instrução entre os ciclos
     int rs_teste, rt_teste, resultado;
 
     switch (estado) {
-
-        case 0: // FETCH
+        case 0: // ETAPA DE BUSCA DA INSTRUÇÃO
             printf("--------Executando ciclo FETCH-----------\n");
             printf("Instrução buscada: %s\n", memoria_instrucao[pc->endereco_atual]);
-            instrucao = codificarInstrucao(memoria_instrucao[pc->endereco_atual]);
+            //RI = Mem[PC]
+            pc->endereco_atual = pc->endereco_proximo;
+            //PC = PC + 1
+            pc->endereco_proximo = pc->endereco_atual + 1;
             estado = 1;
             break;
 
-
-        case 1: // DECODE
+        case 1: // ETAPA DE DECODIFICAÇÃO DA INSTRUCAO E BUSCA DOS REGISTRADORES
             printf("--------Executando ciclo DECODE-----------\n");
+            instrucao = codificarInstrucao(memoria_instrucao[pc->endereco_atual]);
             // Decodificação da instrução
-            if(instrucao.tipo == R_TYPE){
-                estado = 7;
-            } else {
-                estado = 2;
+            switch (instrucao.tipo) {
+                case R_TYPE:
+                    printf("Instrução do tipo R identificada\n");
+                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
+                    registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
+                    registradores_estado->registradorSaidaALU = pc->endereco_atual + instrucao.imm;
+                    estado = 7;
+                    break;
+                case I_TYPE:
+                    printf("Instrução do tipo I identificada\n");
+                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
+                    registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
+                    registradores_estado->registradorSaidaALU = pc->endereco_atual + instrucao.imm;
+                    estado = 2;
+                    break;
+                case J_TYPE:
+                    printf("Instrução do tipo J identificada\n");
+                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
+                    registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
+                    registradores_estado->registradorSaidaALU = pc->endereco_atual + instrucao.imm;
+                    estado = 10;
+                    break;
+                default:
+                    printf("Tipo de instrução desconhecido\n");
+                    estado = 0;
+                    break;
             }
             break;
 
-
-        case 2: // EXECUTE
-            printf("--------Executando ciclo EXECUTE-----------\n");
-            // Executar a instrução decodificada
-            estado = 3;
+        case 2: // EXECUTE (TIPO I)
+            printf("--------Executando ciclo EXECUTE (TIPO I)-----------\n");
+            switch (instrucao.opcode) {
+                case 4: // ADDI
+                    printf("Instrução ADDI\n");
+                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
+                    registradores_estado->registradorB = instrucao.imm;
+                    registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 0);
+                    resultado = registradores_estado->registradorSaidaALU;
+                    estado = 6; // Vai para o ciclo de WRITEBACK
+                    break;
+                case 11: // LW
+                    printf("Instrução LW\n");
+                    printf("AluSaida = %d\n", registradores_estado->registradorSaidaALU);
+                    registradores_estado->registradorSaidaALU = registradores_estado->registradorA + instrucao.imm;
+                    estado = 3;
+                    break;
+                case 15: // SW
+                    printf("Instrução SW\n");
+                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
+                    registradores_estado->registradorB = instrucao.imm;
+                    registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 0);
+                    resultado = registradores_estado->registradorSaidaALU;
+                    estado = 5;
+                    break;
+                case 8: // BEQ
+                    printf("Instrução BEQ\n");
+                    rs_teste = banco_registradores->registradores[instrucao.rs];
+                    rt_teste = banco_registradores->registradores[instrucao.rt];
+                    if (rs_teste == rt_teste) {
+                        pc->endereco_proximo = pc->endereco_atual + instrucao.imm;
+                    } else {
+                        pc->endereco_proximo = pc->endereco_atual + 1;
+                    }
+                    estado = 9;
+                    break;
+                default:
+                    printf("Opcode desconhecido\n");
+                    estado = 0;
+                    break;
+            }
             break;
 
-
         case 3: // MEMORY
-            printf("--------Executando ciclo MEMORY-----------\n");
+            // LW DEVE ACESSAR A MEMORIA DE DADOS
+            printf("--------Executando ciclo MEMORY lw-----------\n");
+            //lw: RDM = Mem[ALUoutput]
+            registradores_estado->registradorSaidaALU = memoria_dados[registradores_estado->registradorSaidaALU];
+            estado = 4;
+            break;
+
+        case 4: // WRITEBACK LW
+            printf("--------Executando ciclo WRITEBACK lw-----------\n");
+            // Escreve o resultado de uma instrução LW no registrador
+            banco_registradores->registradores[instrucao.rt] = registradores_estado->registradorSaidaALU;
+            estado = 0;
+            break;
+
+        case 7: // Estado do tipo R
+            printf("-------- Executando ciclo EXECUTE (TIPO R)-----------\n");
+            switch (instrucao.funct) {
+                case 0: // ADD
+                    printf("Instrução ADD\n");
+                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
+                    registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
+                    registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 0);
+                    resultado = registradores_estado->registradorSaidaALU;
+                    estado = 8; // Vai para o ciclo de WRITEBACK
+                    break;
+                case 2: // SUB
+                    printf("Instrução SUB\n");
+                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
+                    registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
+                    registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 1);
+                    resultado = registradores_estado->registradorSaidaALU;
+                    estado = 8; // Vai para o ciclo de WRITEBACK
+                    break;
+                case 4: // AND
+                    printf("Instrução AND\n");
+                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
+                    registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
+                    registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 2);
+                    resultado = registradores_estado->registradorSaidaALU;
+                    estado = 8; // Vai para o ciclo de WRITEBACK
+                    break;
+                case 5: // OR
+                    printf("Instrução OR\n");
+                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
+                    registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
+                    registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 3);
+                    resultado = registradores_estado->registradorSaidaALU;
+                    estado = 8; // Vai para o ciclo de WRITEBACK
+                    break;
+                default:
+                    printf("Função desconhecida\n");
+                    estado = 0;
+                    break;
+            }
+            break;
+        
+        case 8: //etapa de acesso a memoria ou conclusao de instruçao tipo R
+            printf("--------Executando ciclo MEMORY (TIPO R)-----------\n");
             // Operações de memória se necessário
             estado = 4;
             break;
 
-
-        case 4: // WRITEBACK
-            printf("--------Executando ciclo WRITEBACK-----------\n");
-            // Escrever resultados de volta aos registradores/memória
-            pc->endereco_atual = pc->endereco_proximo;
-            pc->endereco_proximo++;
-            estado = 0;
+        case 10: // Estado do tipo J
+            printf("--------Executando ciclo EXECUTE (TIPO J)-----------\n");
+            pc->endereco_proximo = instrucao.addr;
+            estado = 9;
             break;
-
-
-        //CASE ESPECIAIS PARA CADA TIPO DE INSTRUÇÃO   
-        case 7: // Estado do tipo R
-            printf("--------Caiu no case 7 TIPO R-----------\n");
-            rs_teste = banco_registradores->registradores[instrucao.rs];
-            rt_teste = banco_registradores->registradores[instrucao.rt];
-            resultado = ula(rs_teste, rt_teste, instrucao.funct);
-            if (check_overflow(resultado)) {
-                printf("Erro: Overflow detectado\n");
-                estado = 0;
-                break;
-            }
-            banco_registradores->registradores[instrucao.rd] = resultado;
-            estado = 4; // Próximo estado após executar a instrução tipo R é o WRITEBACK
-            break;
+        
         default:
             printf("Estado desconhecido\n");
             estado = 0;
