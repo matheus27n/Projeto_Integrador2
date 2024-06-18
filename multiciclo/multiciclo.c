@@ -169,10 +169,16 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
     switch (estado) {
         case 0: // ETAPA DE BUSCA DA INSTRUÇÃO
             printf("--------Executando ciclo FETCH-----------\n");
+            if (memoria_instrucao[pc->endereco_atual] == NULL || strlen(memoria_instrucao[pc->endereco_atual]) == 0) { // Verifica se a instrução é nula ou vazia
+                pc->endereco_atual = pc->endereco_proximo;
+                pc->endereco_proximo = pc->endereco_atual + 1;
+                estado = 0; // Reinicia o ciclo
+                break;
+            }
             printf("Instrução buscada: %s\n", memoria_instrucao[pc->endereco_atual]);
-            //RI = Mem[PC]
+            // RI = Mem[PC]
             instrucao = codificarInstrucao(memoria_instrucao[pc->endereco_atual]);
-            //PC = PC + 1
+            // PC = PC + 1
             pc->endereco_atual = pc->endereco_proximo;
             pc->endereco_proximo = pc->endereco_atual + 1;
             estado = 1;
@@ -191,7 +197,7 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                     printf("Instrução do tipo R identificada\n");
                     registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
                     registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
-                    registradores_estado->registradorSaidaALU = 0; 
+                    registradores_estado->registradorSaidaALU = 0;
                     printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
                     printf("Registrador A: %d\n", registradores_estado->registradorA);
                     printf("Registrador B: %d\n", registradores_estado->registradorB);
@@ -215,12 +221,6 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                     printf("|Instrução do tipo J identificada|\n");
                     printf("|--------------------------------|\n");
                     imprimirInstrucao(instrucao);
-                    registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
-                    registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
-                    registradores_estado->registradorSaidaALU = pc->endereco_atual + instrucao.imm;
-                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
-                    printf("Registrador A: %d\n", registradores_estado->registradorA);
-                    printf("Registrador B: %d\n", registradores_estado->registradorB);
                     estado = 10;
                     break;
                 default:
@@ -251,7 +251,6 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                 case 15: // SW
                     printf("Instrução SW - EXECUTE SW\n");
                     registradores_estado->registradorSaidaALU = registradores_estado->registradorA + instrucao.imm;
-
                     printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
                     printf("Registrador A: %d\n", registradores_estado->registradorA);
                     printf("Registrador B: %d\n", registradores_estado->registradorB);
@@ -263,8 +262,9 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                     rt_teste = banco_registradores->registradores[instrucao.rt];
                     if (rs_teste == rt_teste) {
                         pc->endereco_proximo = pc->endereco_atual + instrucao.imm;
+                        printf("BEQ tomado. Novo endereço próximo: %d\n", pc->endereco_proximo);
                     } else {
-                        pc->endereco_proximo = pc->endereco_atual + 1;
+                        printf("BEQ não tomado. Endereço próximo: %d\n", pc->endereco_proximo);
                     }
                     estado = 9;
                     break;
@@ -277,16 +277,16 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
 
         case 3: // MEMORY LW
             printf("--------Executando ciclo MEMORY LW-----------\n");
-            //lw: RDM = Mem[ALUout]
+            // LW: RDM = Mem[ALUout]
             printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
-            printf("Registrar A: %d\n", registradores_estado->registradorA);
+            printf("Registrador A: %d\n", registradores_estado->registradorA);
             printf("Registrador B: %d\n", registradores_estado->registradorB);
             estado = 4;
             break;
 
         case 4: // WRITEBACK (LW)
             printf("--------Executando ciclo WRITEBACK LW-----------\n");
-            // Escreve o resultado de uma instrução LW no registrado
+            // Escreve o resultado de uma instrução LW no registrador
             banco_registradores->registradores[instrucao.rt] = registradores_estado->registradorSaidaALU;
             printf("valor adicionado ao registrador: %d\n", banco_registradores->registradores[instrucao.rt]);
             printf("Escreveu no registrador com sucesso!!\n");
@@ -296,7 +296,7 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
         case 5: // WRITEBACK (SW)
             printf("--------Executando ciclo WRITEBACK SW-----------\n");
             // Escrever resultados de volta à memória (SW)
-            //sw: Mem[ALUout] = B
+            // SW: Mem[ALUout] = B
             memoria_dados[registradores_estado->registradorSaidaALU] = registradores_estado->registradorB;
             estado = 0;
             break;
@@ -304,7 +304,7 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
         case 6: // WRITEBACK (ADDI)
             printf("--------Executando ciclo WRITEBACK-----------\n");
             // Escrever resultados de volta aos registradores (ADDI)
-            //addi: reg[RI] = ULAout
+            // ADDI: reg[RI] = ULAout
             banco_registradores->registradores[instrucao.rt] = registradores_estado->registradorSaidaALU;
             printf("Escreveu no registrador com sucesso!!\n");
             estado = 0;
@@ -356,7 +356,9 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
 
         case 10: // Estado do tipo J
             printf("--------Executando ciclo EXECUTE (TIPO J)-----------\n");
-            pc->endereco_proximo = instrucao.addr;
+            pc->endereco_atual = instrucao.addr;
+            pc->endereco_proximo = pc->endereco_atual + 1;
+            printf("Jump executado com sucesso\n");
             estado = 0;
             break;
 
@@ -366,8 +368,6 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
             break;
     }
 }
-
-
 
 
 // FUNÇÕES DE INICIAÇÃO E ENTRADA
@@ -521,48 +521,54 @@ void imprimirRegistradores(BancoRegistradores *banco_registradores) {
 
 
 //BACK
-struct nodo* save_backup(PC* pc, int memoria_dados[], BancoRegistradores *banco_registradores) {
+void inicializePilha(struct descritor* desc){
+    desc->topo = NULL;
+}
+
+void save_backup(PC* pc, struct descritor *topo, BancoRegistradores *banco_registradores) {
     struct nodo *novoNodo = (struct nodo*)malloc(sizeof(struct nodo));
     if (novoNodo == NULL) {
-        printf("Erro ao alocar memória para o backup");
-        return NULL;
+        printf("Erro ao alocar memória para o backup.\n");
+        return;
     }
-
     for (int i = 0; i < TAM_REGISTRADORES; i++) {
         novoNodo->banco_undo.registradores[i] = banco_registradores->registradores[i];
     }
-
+    for (int i = 0; i < TAM_MEMORIA_INSTRUCAO; i++) {
+        strcpy(novoNodo->mem_undo.memoria.instrucoes[i], memoria_instrucao[i]);
+    }
+    for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
+        novoNodo->mem_undo.memoria.dados[i] = memoria_dados[i];
+    }
     novoNodo->pc_undo.endereco_atual = pc->endereco_atual;
     novoNodo->pc_undo.endereco_proximo = pc->endereco_proximo;
-
-    for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
-        novoNodo->mem_dados_undo[i] = memoria_dados[i];
-    }
-
-    return novoNodo;
+    novoNodo->prox = topo->topo;
+    topo->topo = novoNodo;
 }
 
-void undo(struct nodo *backup, PC *pc, int *memoria_dados, BancoRegistradores *banco_registradores) {
-    if (backup == NULL) {
-        printf("Erro: Backup inválido");
+void undo(PC *pc, struct descritor *topo, BancoRegistradores *banco_registradores) {
+    if (topo->topo == NULL) {
+        printf("Erro: Nenhum backup disponível.\n");
         return;
     }
+    struct nodo *nodoRemovido = topo->topo;
+    topo->topo = topo->topo->prox;
 
     for (int i = 0; i < TAM_REGISTRADORES; i++) {
-        banco_registradores->registradores[i] = backup->banco_undo.registradores[i];
+        banco_registradores->registradores[i] = nodoRemovido->banco_undo.registradores[i];
     }
-
-    pc->endereco_atual = backup->pc_undo.endereco_atual;
-    pc->endereco_proximo = backup->pc_undo.endereco_proximo;
-
+    for (int i = 0; i < TAM_MEMORIA_INSTRUCAO; i++) {
+        strcpy(memoria_instrucao[i], nodoRemovido->mem_undo.memoria.instrucoes[i]);
+    }
     for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
-        memoria_dados[i] = backup->mem_dados_undo[i];
+        memoria_dados[i] = nodoRemovido->mem_undo.memoria.dados[i];
     }
 
+    pc->endereco_atual = nodoRemovido->pc_undo.endereco_atual;
+    pc->endereco_proximo = nodoRemovido->pc_undo.endereco_proximo;
+
+    free(nodoRemovido);
     printf("Estado restaurado para o backup.\n");
-    //mostrar instrução que voltou 
-    codificarInstrucao(memoria_instrucao[pc->endereco_atual]);
-    free(backup); // Libere a memória alocada para o backup
 }
 
 

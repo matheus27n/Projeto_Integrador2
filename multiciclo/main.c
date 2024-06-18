@@ -7,10 +7,11 @@ int main(){
     RegistradoresEstado registradores_estado;
     Instrucao instrucao;
     PC pc;
+    struct descritor desc;
     struct nodo* backup = NULL; //Backup backup;
     inicializarBancoRegistradores(&banco_registradores);
     inicializarPC(&pc);
-
+    inicializePilha(&desc);
 	int opcao = 1;
 	while(opcao != 0){
 		opcao = menu();
@@ -39,19 +40,18 @@ int main(){
                 break;
             case 8:
                 while(pc.endereco_atual<TAM_MEMORIA){
-                    //executarClicoIntrucao();
+                    //executarClicoIntrucao(&pc, &banco_registradores, &registradores_estado);
                 }
                 imprimirMemoriaUnica();
                 imprimirRegistradores(&banco_registradores);
                 printf("programa finalizado\n");
                 break;
             case 9:
+                save_backup(&pc,&desc,&banco_registradores);
                 executarCicloInstrucao(&pc, &banco_registradores, &registradores_estado);
-
-                //backup = save_backup(&pc,memoria_dados,&banco_registradores);
                 break;
             case 10: 
-                undo(backup,&pc,memoria_dados,&banco_registradores);
+                undo(&pc,&desc,&banco_registradores);
                 break;
             case 0:
 				printf("\nFinalizando o programa...\n\n");

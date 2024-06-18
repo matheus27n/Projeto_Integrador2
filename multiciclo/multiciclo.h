@@ -50,10 +50,15 @@ typedef struct { // Estrutura para representar a memória única
     } memoria;
 } MemoriaUnica;
 
+struct descritor{
+    struct nodo *topo;
+};
+
 struct nodo {
     BancoRegistradores banco_undo;
     PC pc_undo;
-    int mem_dados_undo[TAM_MEMORIA_DADOS];
+    MemoriaUnica mem_undo;
+    struct nodo *prox;
 };
 
 // Protótipos das funções
@@ -71,8 +76,9 @@ void salvar_asm();
 Instrucao codificarInstrucao(char *instrucao_string);
 int check_overflow(int result);
 int sign_extend(int value, int original_bits);
-void undo(struct nodo *backup, PC *pc, int *memoria_dados, BancoRegistradores *banco_registradores);
-struct nodo* save_backup(PC*pc, int memoria_dados[], BancoRegistradores *banco_registradores);
+void undo(PC *pc, struct descritor *topo, BancoRegistradores *banco_registradores);
+void inicializePilha(struct descritor* desc);
+void save_backup(PC*pc, struct descritor *topo, BancoRegistradores *banco_registradores);
 
 // Novos protótipos de funções multiciclo
 void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, RegistradoresEstado *registradores_estado);
