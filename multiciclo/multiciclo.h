@@ -40,7 +40,6 @@ typedef struct {
 typedef struct { // Estrutura para representar o contador de programa (PC)
     int endereco_atual; // Endereço da instrução atual
     int endereco_proximo; // Endereço da próxima instrução a ser executada
-    //EstadoCiclo estadoCiclo; // Estado atual do ciclo de execução
 } PC;
 
 typedef struct { // Estrutura para representar a memória única
