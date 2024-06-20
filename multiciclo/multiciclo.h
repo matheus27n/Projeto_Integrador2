@@ -35,6 +35,8 @@ typedef struct {
     int registradorA;
     int registradorB;
     int registradorSaidaALU;
+    int IR; //armazena a instrução atual
+    int MDR; //armazena o dado vindo da memória
 }RegistradoresEstado;
 
 typedef struct { // Estrutura para representar o contador de programa (PC)

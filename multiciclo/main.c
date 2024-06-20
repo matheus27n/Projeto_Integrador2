@@ -40,7 +40,7 @@ int main(){
                 break;
             case 8:
                 while(pc.endereco_atual<TAM_MEMORIA){
-                    //executarClicoIntrucao(&pc, &banco_registradores, &registradores_estado);
+                    executarCicloInstrucao(&pc, &banco_registradores, &registradores_estado);
                 }
                 imprimirMemoriaUnica();
                 imprimirRegistradores(&banco_registradores);
