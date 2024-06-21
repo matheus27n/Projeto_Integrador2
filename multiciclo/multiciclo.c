@@ -163,6 +163,8 @@ int sign_extend(int value, int original_bits) {
 
 // Implemente as funções para executar o programa e as instruções
 //executar programa com todos os ciclos necessarios FETCH, DECODE, EXECUTE, MEMORY, WRITEBACK
+// Implemente as funções para executar o programa e as instruções
+//executar programa com todos os ciclos necessarios FETCH, DECODE, EXECUTE, MEMORY, WRITEBACK
 void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, RegistradoresEstado *registradores_estado) {
     static int estado = 0; // Para acompanhar o ciclo atual
     static Instrucao instrucao; // Armazenar a instrução entre os ciclos
@@ -178,7 +180,7 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                 estado = 0; // Reinicia o ciclo
                 break;
             }
-            printf("Instrução buscada: %s\n", memoria_instrucao[pc->endereco_atual]);
+            printf("Instrucao buscada: %s\n", memoria_instrucao[pc->endereco_atual]);
             // RI = Mem[PC]
             instrucao = codificarInstrucao(memoria_instrucao[pc->endereco_atual]);
             // PC = PC + 1
@@ -198,23 +200,23 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                 case R_TYPE:
                     printf("\n");
                     printf("|--------------------------------|\n");
-                    printf("|Instrução do tipo R identificada|\n");
+                    printf("|Instrucao do tipo R identificada|\n");
                     printf("|--------------------------------|\n");
                     imprimirInstrucao(instrucao); // Chama a função para imprimir os campos da instrução
-                    printf("Instrução do tipo R identificada\n");
+                    printf("Instrucao do tipo R identificada\n");
                     registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
                     registradores_estado->registradorB = banco_registradores->registradores[instrucao.rt];
                     registradores_estado->registradorSaidaALU = 0;
                     printf("Registrador A: %d\n", registradores_estado->registradorA);
                     printf("Registrador B: %d\n", registradores_estado->registradorB);
-                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
+                    printf("Registrador de saida da ALU: %d\n", registradores_estado->registradorSaidaALU);
                     printf("\n");
                     estado = 7;
                     break;
                 case I_TYPE:
                     printf("\n");
                     printf("|--------------------------------|\n");
-                    printf("|Instrução do tipo I identificada|\n");
+                    printf("|Instrucao do tipo I identificada|\n");
                     printf("|--------------------------------|\n");
                     imprimirInstrucao(instrucao);
                     registradores_estado->registradorA = banco_registradores->registradores[instrucao.rs];
@@ -223,14 +225,14 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                     printf("Registrador A: %d\n", instrucao.rs);
                     printf("Registrador B: %d\n", instrucao.rt);
                     printf("valor do imediato: %d\n", instrucao.imm);
-                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
+                    printf("Registrador de saida da ALU: %d\n", registradores_estado->registradorSaidaALU);
                     printf("\n");
                     estado = 2;
                     break;
                 case J_TYPE:
                     printf("\n");
                     printf("|--------------------------------|\n");
-                    printf("|Instrução do tipo J identificada|\n");
+                    printf("|Instrucao do tipo J identificada|\n");
                     printf("|--------------------------------|\n");
                     imprimirInstrucao(instrucao);
                     printf("\n");
@@ -238,7 +240,7 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
                     break;
                 default:
                     printf("\n");
-                    printf("Tipo de instrução desconhecido\n");
+                    printf("Tipo de Instrucao desconhecido\n");
                     estado = 0;
                     break;
             }
@@ -250,41 +252,41 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
             switch (instrucao.opcode) {
                 case 4: // ADDI
                     printf("\n");
-                    printf("Instrução ADDI\n");
+                    printf("Instrucao ADDI\n");
                     registradores_estado->registradorSaidaALU = registradores_estado->registradorA + instrucao.imm;
-                    printf("Registrador de saída da ALU + imm: %d\n", registradores_estado->registradorSaidaALU);
-                    printf("executando instrução...\n");
+                    printf("Registrador de saida da ALU + imm: %d\n", registradores_estado->registradorSaidaALU);
+                    printf("executando Instrucao...\n");
                     printf("\n");
                     estado = 6; // Vai para o ciclo de WRITEBACK
                     break;
                 case 11: // LW
                     printf("\n");
-                    printf("Instrução LW\n");
+                    printf("Instrucao LW\n");
                     registradores_estado->registradorSaidaALU = registradores_estado->registradorA + instrucao.imm;
-                    printf("executando instrução...\n");
+                    printf("executando Instrucao...\n");
                     printf("O valor da ALUSaida é: [%d]\n", registradores_estado->registradorSaidaALU);
                     printf("\n");
                     estado = 3;
                     break;
                 case 15: // SW
                     printf("\n");
-                    printf("Instrução SW\n");
+                    printf("Instrucao SW\n");
                     registradores_estado->registradorSaidaALU = registradores_estado->registradorA + instrucao.imm;
-                    printf("executando instrução...\n");
+                    printf("executando Instrucao...\n");
                     printf("O valor da ALUSaida é: [%d]\n", registradores_estado->registradorSaidaALU);
                     printf("\n");
                     estado = 5;
                     break;
                 case 8: // BEQ
                     printf("\n");
-                    printf("Instrução BEQ\n");
+                    printf("Instrucao BEQ\n");
                     rs_teste = banco_registradores->registradores[instrucao.rs];
                     rt_teste = banco_registradores->registradores[instrucao.rt];
                     if (rs_teste == rt_teste) {
                         pc->endereco_proximo = pc->endereco_atual + instrucao.imm;
-                        printf("BEQ tomado. Novo endereço próximo: %d\n", pc->endereco_proximo);
+                        printf("BEQ tomado. Novo endereço proximo: %d\n", pc->endereco_proximo);
                     } else {
-                        printf("BEQ não tomado. Endereço próximo: %d\n", pc->endereco_proximo);
+                        printf("BEQ não tomado. Endereço proximo: %d\n", pc->endereco_proximo);
                     }
                     printf("\n");
                     estado = 9;
@@ -299,10 +301,9 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
         case 3: // MEMORY LW
             printf("\n");
             printf("--------Executando ciclo MEMORY LW-----------\n");
-            // LW: RDM = Mem[ALUout]
-            printf("Acessando a memória de dados...\n");
+            printf("Acessando a memoria de dados...\n");
             registradores_estado->registradorSaidaALU = memoria_dados[registradores_estado->registradorSaidaALU];
-            printf("Valor lido da memória de dados: %d\n", registradores_estado->registradorSaidaALU);
+            printf("Valor lido da memoria de dados: %d\n", registradores_estado->registradorSaidaALU);
             printf("\n");
             estado = 4;
             break;
@@ -324,7 +325,7 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
             // Escrever resultados de volta à memória (SW)
             // SW: Mem[ALUout] = B
             memoria_dados[registradores_estado->registradorSaidaALU] = registradores_estado->registradorB;
-            printf("O valor que vai ser escrito na memória de dados: %d\n", registradores_estado->registradorB);
+            printf("O valor que vai ser escrito na memoria de dados: %d\n", registradores_estado->registradorB);
             printf("Escreveu na memória de dados com sucesso!!\n");
             printf("\n");
             estado = 0;
@@ -348,32 +349,35 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
             switch (instrucao.funct) {
                 case 0: // ADD
                     printf("\n");
-                    printf("Instrução ADD\n");
+                    printf("Instrucao ADD\n");
                     registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 0);
-                    printf("Registrador de saída da ALU: %d\n", registradores_estado->registradorSaidaALU);
+                    printf("Registrador de saida da ALU: %d\n", registradores_estado->registradorSaidaALU);
                     estado = 8; // Vai para o ciclo de WRITEBACK
                     break;
                 case 2: // SUB
                     printf("\n");
-                    printf("Instrução SUB\n");
+                    printf("Instrucao SUB\n");
                     registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 1);
+                    printf("Registrador de saida da ALU: %d\n", registradores_estado->registradorSaidaALU);
                     estado = 8; // Vai para o ciclo de WRITEBACK
                     break;
                 case 4: // AND
                     printf("\n");
-                    printf("Instrução AND\n");
+                    printf("Instrucao AND\n");
                     registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 2);
+                    printf("Registrador de saida da ALU: %d\n", registradores_estado->registradorSaidaALU);
                     estado = 8; // Vai para o ciclo de WRITEBACK
                     break;
                 case 5: // OR
                     printf("\n");
-                    printf("Instrução OR\n");
+                    printf("Instrucao OR\n");
                     registradores_estado->registradorSaidaALU = ula(registradores_estado->registradorA, registradores_estado->registradorB, 3);
+                    printf("Registrador de saida da ALU: %d\n", registradores_estado->registradorSaidaALU);
                     estado = 8; // Vai para o ciclo de WRITEBACK
                     break;
                 default:
                     printf("\n");
-                    printf("Função desconhecida\n");
+                    printf("Funcao desconhecida\n");
                     estado = 0;
                     break;
             }
@@ -394,6 +398,11 @@ void executarCicloInstrucao(PC *pc, BancoRegistradores *banco_registradores, Reg
             printf("\n");
             printf("--------Executando condição BEQ-----------\n");
             // Verificação de condição BEQ
+            if (pc->endereco_atual == pc->endereco_proximo) {
+                printf("BEQ tomado. Novo endereço proximo: %d\n", pc->endereco_proximo);
+            } else {
+                printf("BEQ não tomado. Endereço proximo: %d\n", pc->endereco_proximo);
+            }
             printf("\n");
             estado = 0;
             break;
@@ -594,13 +603,43 @@ void save_backup(PC* pc, struct descritor *topo, BancoRegistradores *banco_regis
 }
 
 void undo(PC *pc, struct descritor *topo, BancoRegistradores *banco_registradores) {
+    // Verificar se há backups disponíveis
     if (topo->topo == NULL) {
         printf("Erro: Nenhum backup disponível.\n");
         return;
     }
+
+    // Remover o nó mais recente da pilha
     struct nodo *nodoRemovido = topo->topo;
+    if (nodoRemovido == NULL) {
+        printf("Erro: Nó removido é nulo.\n");
+        return;
+    }
+
+    // Atualizar o topo da pilha
     topo->topo = topo->topo->prox;
 
+    // Acessar e imprimir informações do nó removido
+    printf("Estado anterior:\n");
+    printf("Memoria de Instrucoes:\n");
+    for (int i = 0; i < TAM_MEMORIA_INSTRUCAO; i++) {
+        printf("Instrucao[%d]: %s\n", i, nodoRemovido->mem_undo.memoria.instrucoes[i]);
+    }
+
+    printf("Memoria de Dados:\n");
+    for (int i = 0; i < TAM_MEMORIA_DADOS; i++) {
+        printf("Dados[%d]: %d\n", i, nodoRemovido->mem_undo.memoria.dados[i]);
+    }
+
+    printf("Conteudo do banco de registradores:\n");
+    for (int i = 0; i < TAM_REGISTRADORES; i++) {
+        printf("R%d: %d\n", i, nodoRemovido->banco_undo.registradores[i]);
+    }
+
+    printf("PC atual: %d\n", nodoRemovido->pc_undo.endereco_atual);
+    printf("PC proximo: %d\n", nodoRemovido->pc_undo.endereco_proximo);
+
+    // Atualizar informações
     for (int i = 0; i < TAM_REGISTRADORES; i++) {
         banco_registradores->registradores[i] = nodoRemovido->banco_undo.registradores[i];
     }
@@ -614,8 +653,34 @@ void undo(PC *pc, struct descritor *topo, BancoRegistradores *banco_registradore
     pc->endereco_atual = nodoRemovido->pc_undo.endereco_atual;
     pc->endereco_proximo = nodoRemovido->pc_undo.endereco_proximo;
 
+    // Liberar memória do nó removido
     free(nodoRemovido);
+
     printf("Estado restaurado para o backup.\n");
+
+    // Adicionar opção de voltar
+    char escolha;
+    while (1) {
+        printf("Deseja voltar ao estado anterior? (s/n): ");
+        int retorno = scanf(" %c", &escolha);
+        if (retorno != 1) {
+            printf("Erro ao ler entrada.\n");
+            // Tratar o erroB
+            continue;
+        }
+        if (escolha == 's') {
+            if (topo->topo == NULL) {
+                printf("Erro: Nenhum backup disponível.\n");
+                break;
+            }
+            undo(pc, topo, banco_registradores);
+            break;
+        } else if (escolha == 'n') {
+            break;
+        } else {
+            printf("Entrada inválida. Por favor, digite 's' ou 'n'.\n");
+        }
+    }
 }
 
 

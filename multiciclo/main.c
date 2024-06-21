@@ -63,4 +63,3 @@ int main(){
 	free(backup); // Libere a memória alocada para o backup
         return 0;
 }
-
